@@ -1,9 +1,16 @@
 -- =====================================================================
 -- BCA DECA Hub -- complete database setup
--- Generated 2026-07-30
 --
 -- HOW TO RUN: Supabase Dashboard -> SQL Editor -> New query ->
--- paste this entire file -> Run. Safe to run once on a fresh project.
+-- paste this ENTIRE file -> Run.
+--
+-- NOTE: the SQL Editor runs this as ONE transaction, so if any statement
+-- fails, everything rolls back and you get zero tables. The statements
+-- that can fail on hosted Supabase (storage policies, realtime
+-- publication, alter database) are wrapped in exception handlers so they
+-- degrade to a NOTICE instead of killing the whole run.
+--
+-- When it succeeds the final SELECT prints a row count summary.
 -- =====================================================================
 
 
@@ -799,21 +806,36 @@ insert into storage.buckets (id, name, public) values ('conference-docs', 'confe
 insert into storage.buckets (id, name, public) values ('gallery', 'gallery', true)
   on conflict (id) do nothing;
 
-create policy "conference_docs_read_authenticated" on storage.objects
-  for select to authenticated using (bucket_id = 'conference-docs');
+-- Guarded: `create policy` has no IF NOT EXISTS, and storage.objects is owned by
+-- supabase_storage_admin on hosted projects. Since the whole setup script runs in one
+-- transaction, an unguarded failure here would roll back every other migration too.
+-- Dropping first makes re-runs idempotent.
+do $$
+begin
+  drop policy if exists "conference_docs_read_authenticated" on storage.objects;
+  drop policy if exists "conference_docs_officer_write" on storage.objects;
+  drop policy if exists "gallery_public_read" on storage.objects;
+  drop policy if exists "gallery_officer_write" on storage.objects;
 
-create policy "conference_docs_officer_write" on storage.objects
-  for all to authenticated
-  using (bucket_id = 'conference-docs' and public.is_officer(auth.uid()))
-  with check (bucket_id = 'conference-docs' and public.is_officer(auth.uid()));
+  create policy "conference_docs_read_authenticated" on storage.objects
+    for select to authenticated using (bucket_id = 'conference-docs');
 
-create policy "gallery_public_read" on storage.objects
-  for select using (bucket_id = 'gallery');
+  create policy "conference_docs_officer_write" on storage.objects
+    for all to authenticated
+    using (bucket_id = 'conference-docs' and public.is_officer(auth.uid()))
+    with check (bucket_id = 'conference-docs' and public.is_officer(auth.uid()));
 
-create policy "gallery_officer_write" on storage.objects
-  for all to authenticated
-  using (bucket_id = 'gallery' and public.is_officer(auth.uid()))
-  with check (bucket_id = 'gallery' and public.is_officer(auth.uid()));
+  create policy "gallery_public_read" on storage.objects
+    for select using (bucket_id = 'gallery');
+
+  create policy "gallery_officer_write" on storage.objects
+    for all to authenticated
+    using (bucket_id = 'gallery' and public.is_officer(auth.uid()))
+    with check (bucket_id = 'gallery' and public.is_officer(auth.uid()));
+exception
+  when insufficient_privilege then
+    raise notice 'insufficient privilege on storage.objects; add the storage policies via the dashboard';
+end $$;
 
 
 -- ###################################################################
@@ -865,7 +887,20 @@ grant select on public.public_profiles to authenticated;
 
 -- Realtime subscriptions (components/leaderboard/Leaderboard.tsx) only fire for tables
 -- explicitly added to the supabase_realtime publication -- it's empty by default.
-alter publication supabase_realtime add table public.profiles;
+--
+-- Guarded: on hosted Supabase the publication may already include the table (re-running
+-- this then raises duplicate_object), and the whole setup script runs in one transaction,
+-- so an unguarded failure here would roll back every other migration too.
+do $$
+begin
+  alter publication supabase_realtime add table public.profiles;
+exception
+  when duplicate_object then null;
+  when undefined_object then
+    raise notice 'supabase_realtime publication not found; enable Realtime for public.profiles in the dashboard';
+  when insufficient_privilege then
+    raise notice 'insufficient privilege to alter supabase_realtime; enable Realtime for public.profiles in the dashboard';
+end $$;
 
 
 -- ###################################################################
@@ -876,7 +911,18 @@ alter publication supabase_realtime add table public.profiles;
 -- set it -- it was silently always falling back to the hardcoded 'bergen.org' default no matter
 -- what NEXT_PUBLIC_ALLOWED_EMAIL_DOMAIN was set to on the app side. Keep this value in sync with
 -- that env var; if the chapter's school domain ever changes, update both.
-alter database postgres set app.allowed_email_domain = 'bergen.org';
+--
+-- Guarded: `alter database` needs privileges the SQL Editor role may not have on hosted
+-- Supabase, and the whole setup script runs in one transaction -- an unguarded failure here
+-- would roll back every other migration. If this is skipped, handle_new_user() still falls
+-- back to the 'bergen.org' default baked into 0001, so signup restriction stays enforced.
+do $$
+begin
+  execute format('alter database %I set app.allowed_email_domain = %L', current_database(), 'bergen.org');
+exception
+  when insufficient_privilege then
+    raise notice 'could not set app.allowed_email_domain; falling back to the default in handle_new_user()';
+end $$;
 
 
 -- ###################################################################
@@ -999,3 +1045,17 @@ insert into public.announcements (title, body, kind, pinned, room_assignments) v
 insert into public.announcements (title, body, kind) values
 ('Spring Bakesale — Main Lobby', 'Fri Apr 17 · proceeds fund ICDC travel. Sign up to bring an item or staff a shift.', 'fundraiser'),
 ('Krispy Kreme Pre-Sale', 'Orders due Mar 6. $12/dozen, pickup before the State send-off.', 'fundraiser');
+
+
+-- ###################################################################
+-- ## Post-setup: refresh the API schema cache, then verify
+-- ###################################################################
+
+notify pgrst, 'reload schema';
+
+select
+  (select count(*) from public.questions)            as questions,
+  (select count(*) from public.shop_items)           as shop_items,
+  (select count(*) from public.announcements)        as announcements,
+  (select count(*) from public.blazer_inventory)     as blazer_sizes,
+  (select count(*) from public.officer_invite_codes) as invite_codes;
