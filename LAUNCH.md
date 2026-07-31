@@ -62,12 +62,56 @@ Then open http://localhost:3000
 
 ## Step 5 — Deploy (when you're ready for members to use it)
 
-1. Push this folder to a GitHub repo (`.gitignore` already excludes `.env.local`).
-2. Import the repo at https://vercel.com/new
-3. In Vercel → Settings → Environment Variables, add the same four variables from
-   `.env.local`, but set `NEXT_PUBLIC_SITE_URL` to your real Vercel URL.
-4. Back in Supabase → **Authentication → URL Configuration**, add that same URL to
-   **Site URL** and **Redirect URLs**, or email confirmation links will 404.
+### 5a. Push to GitHub
+
+`.gitignore` already excludes `.env.local`, so your keys stay out of the repo.
+
+```bash
+gh repo create bca-deca-hub --private --source=. --push
+```
+
+(or create an empty repo on github.com, then `git remote add origin <url> && git push -u origin main`)
+
+### 5b. Import to Vercel
+
+Go to https://vercel.com/new and import the repo. Framework auto-detects as Next.js;
+leave the build settings alone.
+
+### 5c. Set environment variables in Vercel
+
+Settings → Environment Variables. Add all five from `.env.local`:
+
+| Variable | Value |
+|---|---|
+| `NEXT_PUBLIC_SUPABASE_URL` | same as local |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | same as local |
+| `SUPABASE_SERVICE_ROLE_KEY` | same as local (**never** prefix this with `NEXT_PUBLIC_`) |
+| `NEXT_PUBLIC_ALLOWED_EMAIL_DOMAIN` | `bergen.org` |
+| `NEXT_PUBLIC_SITE_URL` | **your Vercel URL** — e.g. `https://bca-deca-hub.vercel.app` |
+
+`NEXT_PUBLIC_SITE_URL` is the one that differs from local. It builds the links in
+confirmation and password-reset emails (`app/(auth)/actions.ts`), so if it still says
+`localhost:3000` in production, every emailed link will point at the member's own
+machine and fail.
+
+Redeploy after adding them — Vercel does not apply env vars to an existing build.
+
+### 5d. Point Supabase at the deployed URL
+
+Supabase → **Authentication → URL Configuration**:
+
+- **Site URL**: `https://your-app.vercel.app`
+- **Redirect URLs**: add `https://your-app.vercel.app/auth/callback`
+
+That exact callback path is what the app uses for both email confirmation and
+password reset. If it's missing, signup emails land on an error page.
+
+### 5e. Smoke-test production
+
+1. Visit the deployed URL — homepage should load with the live member count
+2. Hit `/prep/arena` while logged out — must redirect to `/login`
+3. Sign up with a school email, confirm via the emailed link, verify it returns to
+   your site (not localhost)
 
 ---
 
