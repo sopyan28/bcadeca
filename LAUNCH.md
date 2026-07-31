@@ -35,11 +35,42 @@ select
 
 Expect roughly: 18 questions, 16 shop items, 3 announcements.
 
-## Step 2 — Turn on email confirmations
+## Step 2 — Email delivery (the real launch blocker)
 
-Dashboard → **Authentication → Providers → Email**. Make sure "Confirm email" is on.
-Supabase's free tier sends a limited number of emails per hour; that is fine for a
-club of ~120 but not for a mass signup in one sitting.
+Verified against the live project: the email provider is enabled, signups are open,
+and **email confirmation is required** (`mailer_autoconfirm = false`). So every signup
+waits on a confirmation email before the member can log in.
+
+The catch is *who sends that email*. Supabase's **built-in email service is for
+testing only** — it is heavily rate-limited (a couple of messages per hour) and
+Supabase explicitly does not support it for production traffic. With ~120 members
+signing up around the same meeting, the vast majority of those emails will never
+arrive.
+
+**Before inviting members, connect a real SMTP provider.** Dashboard →
+**Project Settings → Authentication → SMTP Settings**. Free tiers that comfortably
+cover a school club:
+
+| Provider | Free tier |
+|---|---|
+| [Resend](https://resend.com) | 3,000/month — simplest setup |
+| [Brevo](https://brevo.com) | 300/day |
+| [Mailgun](https://mailgun.com) | limited trial, then paid |
+
+You will need to verify a sending domain (or use the provider's test domain for
+initial testing).
+
+### Testing before SMTP is set up
+
+Two ways to get accounts working without waiting on email:
+
+**Manually confirm a user** — Dashboard → **Authentication → Users** → click the user
+→ confirm their email. Good for bootstrapping the first officer.
+
+**Temporarily auto-confirm** — Dashboard → **Authentication → Providers → Email** →
+turn *off* "Confirm email". Anyone can then log in immediately without verification.
+Fine while testing; turn it back on before real members join, or anyone can register
+with an address they don't own.
 
 ## Step 3 — Create the first officer account
 
