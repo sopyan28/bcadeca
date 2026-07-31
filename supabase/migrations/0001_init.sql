@@ -3,15 +3,6 @@
 create extension if not exists pgcrypto;
 
 -- ============================================================================
--- Helper: officer check (security definer so it can be used inside RLS policies
--- without those policies needing direct select access to profiles.role themselves)
--- ============================================================================
-create or replace function public.is_officer(uid uuid) returns boolean
-language sql stable security definer set search_path = public as $$
-  select exists(select 1 from public.profiles where id = uid and role = 'officer');
-$$;
-
--- ============================================================================
 -- Officer invite codes (created first: handle_new_user() below references it)
 -- ============================================================================
 create table public.officer_invite_codes (
@@ -53,6 +44,20 @@ create index idx_profiles_xp on public.profiles(xp desc);
 create view public.public_profiles as
   select id, full_name, xp, level, avatar_color, streak_count, role
   from public.profiles;
+
+-- ============================================================================
+-- Helper: officer check (security definer so it can be used inside RLS policies
+-- without those policies needing direct select access to profiles.role themselves).
+--
+-- Must be declared AFTER public.profiles exists: this is `language sql`, whose body
+-- Postgres parses and validates at CREATE time (unlike plpgsql, which is checked
+-- lazily). Declaring it before the table aborts with 42P01 relation does not exist.
+-- Its first actual use is handle_new_user() below.
+-- ============================================================================
+create or replace function public.is_officer(uid uuid) returns boolean
+language sql stable security definer set search_path = public as $$
+  select exists(select 1 from public.profiles where id = uid and role = 'officer');
+$$;
 
 alter table public.profiles enable row level security;
 
