@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&amp;family=Nunito:wght@400;600;700;800;900&amp;display=swap" rel="stylesheet">
+<script src="./image-slot.js"></script>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{font-family:'Nunito',sans-serif;background:#eaf6ff;color:#103154;-webkit-font-smoothing:antialiased}
+  ::-webkit-scrollbar{height:10px;width:10px}
+  ::-webkit-scrollbar-thumb{background:#bcdcf2;border-radius:5px;border:2px solid #eaf6ff}
+  ::-webkit-scrollbar-thumb:hover{background:#9cc8ec}
+  @keyframes pfloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+  @keyframes pwaddle{0%{transform:rotate(-9deg) translateX(-3px)}100%{transform:rotate(9deg) translateX(3px)}}
+  @keyframes pparty{0%{transform:translateY(-7px) rotate(-7deg) scale(1.05)}100%{transform:translateY(3px) rotate(7deg) scale(.97)}}
+  @keyframes pcelebrate{0%,100%{transform:translateY(0) scale(1)}25%{transform:translateY(-12px) scale(1.08) rotate(-5deg)}75%{transform:translateY(-9px) scale(1.06) rotate(5deg)}}
+  @keyframes pstar{0%,100%{transform:scale(1) rotate(0)}25%{transform:scale(1.13) rotate(-6deg)}50%{transform:scale(1.06) translateY(-6px)}75%{transform:scale(1.13) rotate(6deg)}}
+  @keyframes toastIn{from{opacity:0;transform:translateY(14px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
+  @keyframes pop{0%{transform:scale(.8);opacity:0}60%{transform:scale(1.04)}100%{transform:scale(1);opacity:1}}
+  @keyframes shimmer{0%{background-position:-200px 0}100%{background-position:200px 0}}
+  a{color:#1c7fc4;text-decoration:none}
+  a:hover{color:#125f96;text-decoration:underline}
+</style>
+</helmet>
+
+<div style="min-height:100vh;display:flex;flex-direction:column;background:#eaf6ff">
+
+  <!-- ===== HEADER ===== -->
+  <header style="position:sticky;top:0;z-index:60;background:#ffffff;border-bottom:2px solid #dcebf8;box-shadow:0 2px 14px rgba(40,120,200,.07)">
+    <div style="max-width:1180px;margin:0 auto;padding:11px 22px;display:flex;align-items:center;gap:18px">
+      <div onClick="{{ navHome }}" style="display:flex;align-items:center;gap:10px;cursor:pointer">
+        <div style="width:38px;height:38px;border-radius:6px;background:linear-gradient(160deg,#34a9ee,#1366b3);display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 3px 0 #0f5497">🐧</div>
+        <div style="line-height:1.05">
+          <div style="font-family:'Sora';font-weight:800;font-size:19px;color:#0e3a63">BCA <span style="color:#1b8ad6">DECA</span></div>
+          <div style="font-size:10px;font-weight:700;letter-spacing:.4px;color:#7c99b6">{{ schoolName }}</div>
+        </div>
+      </div>
+
+      <nav style="display:flex;gap:4px;margin-left:8px">
+        <button onClick="{{ navHome }}" style="position:relative;border:none;background:none;cursor:pointer;font-family:'Nunito';font-weight:800;font-size:14px;padding:9px 14px;border-radius:5px;color:{{ homeColor }}">Home
+          <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}"><span style="position:absolute;left:14px;right:14px;bottom:1px;height:3px;border-radius:3px;background:#1b8ad6"></span></sc-if>
+        </button>
+        <button onClick="{{ navMembers }}" style="position:relative;border:none;background:none;cursor:pointer;font-family:'Nunito';font-weight:800;font-size:14px;padding:9px 14px;border-radius:5px;color:{{ membersColor }}">Members
+          <sc-if value="{{ isMembers }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;left:14px;right:14px;bottom:1px;height:3px;border-radius:3px;background:#1b8ad6"></span></sc-if>
+        </button>
+        <button onClick="{{ navPrepTop }}" style="position:relative;border:none;background:none;cursor:pointer;font-family:'Nunito';font-weight:800;font-size:14px;padding:9px 14px;border-radius:5px;color:{{ prepTopColor }}">Prep
+          <sc-if value="{{ isPrepTab }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;left:14px;right:14px;bottom:1px;height:3px;border-radius:3px;background:#1b8ad6"></span></sc-if>
+        </button>
+        <button onClick="{{ navPastTop }}" style="position:relative;border:none;background:none;cursor:pointer;font-family:'Nunito';font-weight:800;font-size:14px;padding:9px 14px;border-radius:5px;color:{{ pastTopColor }}">Past Conferences
+          <sc-if value="{{ isPastTab }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;left:14px;right:14px;bottom:1px;height:3px;border-radius:3px;background:#1b8ad6"></span></sc-if>
+        </button>
+      </nav>
+
+      <div style="flex:1"></div>
+
+      <sc-if value="{{ showStats }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;align-items:center;gap:8px">
+        <div style="display:flex;align-items:center;gap:5px;background:#fff3d6;border:1.5px solid #ffd97a;border-radius:10px;padding:5px 11px;font-weight:800;font-size:13px;color:#a9690a">🔥 {{ streak }}</div>
+        <div style="display:flex;align-items:center;gap:8px;background:#e9f6ff;border:1.5px solid #bfe2fa;border-radius:10px;padding:4px 11px 4px 9px">
+          <span style="font-size:14px">⚡</span>
+          <div style="line-height:1">
+            <div style="font-size:9px;font-weight:800;color:#3f86bf;letter-spacing:.3px">LVL {{ level }}</div>
+            <div style="width:54px;height:5px;background:#cfe6f7;border-radius:3px;overflow:hidden;margin-top:2px"><div style="height:100%;background:#28a3ee;border-radius:3px;width:{{ xpPct }}%"></div></div>
+          </div>
+          <span style="font-size:12px;font-weight:800;color:#1c7fc4">{{ totalXp }} XP</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:5px;background:#fff8e6;border:1.5px solid #ffe08a;border-radius:10px;padding:5px 11px;font-weight:800;font-size:13px;color:#b07d05">💰 {{ dd }}</div>
+      </div>
+      </sc-if>
+    </div>
+  </header>
+
+  <!-- ===== HOME ===== -->
+  <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
+  <main style="flex:1">
+    <div style="width:100%;height:260px;position:relative"><image-slot id="home-banner" shape="rect" placeholder="Drop a chapter banner photo"></image-slot></div>
+    <section style="background:linear-gradient(165deg,#bfe6ff 0%,#e7f5ff 60%,#eaf6ff 100%);overflow:hidden;position:relative">
+      <div style="max-width:1100px;margin:0 auto;padding:64px 22px 72px;display:grid;grid-template-columns:1.15fr .85fr;gap:30px;align-items:center">
+        <div>
+          <div style="display: inline-block; background: #fff; border: 1.5px solid #cfe6f7; border-radius: 15px; padding: 6px 15px; font-weight: 800; font-size: 12px; color: #1c7fc4; margin-bottom: 18px; position: relative">🏆&nbsp; The 2026–2027 Season has started!</div>
+          <h1 style="font-family:'Sora';font-weight:800;font-size:50px;line-height:1.04;color:#0c3257;letter-spacing:-.5px">Bergen County&nbsp;<br>Academies DECA</h1>
+          <p style="font-size:17px;line-height:1.55;color:#3f648a;margin-top:16px;max-width:430px">Introducing the BCA DECA Chapter website! This is your designated place to find competition resources, information on your events and how to prep for them, practice questions with a live leaderboard, and all the important chapter announcements.&nbsp;<br><br>Let's see who will be the next big thing!</p>
+          <div style="display:flex;gap:12px;margin-top:26px">
+            <button onClick="{{ goPrep }}" style="border:none;cursor:pointer;font-family:'Sora';font-weight:700;font-size:16px;color:#fff;background:#28a3ee;padding:14px 24px;border-radius:7px;box-shadow:0 5px 0 #1366b3">Start prepping →</button>
+            <button onClick="{{ navMembers }}" style="border:2px solid #bcdcf2;cursor:pointer;font-family:'Sora';font-weight:700;font-size:16px;color:#1c6aa8;background:#fff;padding:13px 22px;border-radius:7px;box-shadow:0 4px 0 #d7e8f5">Members area</button>
+          </div>
+        </div>
+        <div style="position:relative;display:flex;justify-content:center;align-items:flex-end;min-height:230px">
+          <div style="font-size:140px;filter:drop-shadow(0 14px 18px rgba(20,90,160,.22));animation:pfloat 3.4s ease-in-out infinite">🐧</div>
+          <div style="position:absolute;top:6px;right:24px;background:#fff;border-radius:7px;padding:9px 13px;font-weight:800;font-size:13px;color:#1c7fc4;box-shadow:0 6px 18px rgba(30,110,190,.18);animation:pfloat 4s ease-in-out infinite">+50 XP ⚡</div>
+          <div style="position:absolute;bottom:40px;left:10px;background:#fff;border-radius:7px;padding:9px 13px;font-weight:800;font-size:13px;color:#b07d05;box-shadow:0 6px 18px rgba(30,110,190,.18);animation:pfloat 3.7s ease-in-out infinite .5s">🥇 Rank #1</div>
+        </div>
+      </div>
+    </section>
+
+    
+
+    <section style="max-width:1100px;margin:0 auto;padding:10px 22px 64px;display:grid;grid-template-columns:1fr 1fr;gap:20px">
+      <div style="background:#fff;border:2px solid #e3eef8;border-radius:10px;padding:30px">
+        <div style="font-weight:800;font-size:12px;letter-spacing:.6px;text-transform:uppercase;color:#1c7fc4;margin-bottom:10px">ABOUT US</div>
+        <h2 style="font-family:'Sora';font-weight:700;font-size:25px;color:#0e3a63;margin-bottom:11px">BCA's DECA Chapter</h2>
+        <p style="font-size:14.5px;line-height:1.6;color:#4c6d8f">We're a chapter of the global organization DECA that prepares emerging leaders for their future careers through competitive events at the regional, state, and international level. At BCA, DECA is exclusively open to students in ABF, the Academy for Business and Finance, allowing our academy to apply what we learn in class to solving real issues. Through these case studies, DECA tests our knowledge across multiple areas of business, including Marketing, Management, Finance, Entrepreneurship, and Hospitality, while developing our critical thinking and public speaking skills. This year, we hope to work hard to send as many as we can to a trip to Anaheim at the International Career Development Conference.&nbsp;</p>
+        <div style="display:flex;gap:26px;margin-top:22px">
+          <div><div style="font-family:'Sora';font-weight:800;font-size:26px;color:#28a3ee">120+</div><div style="font-size:12px;font-weight:700;color:#7c99b6">Active members</div></div>
+          <div><div style="font-family:'Sora';font-weight:800;font-size:26px;color:#28a3ee">34</div><div style="font-size:12px;font-weight:700;color:#7c99b6">ICDC qualifiers '25</div></div>
+          <div><div style="font-family:'Sora';font-weight:800;font-size:26px;color:#28a3ee">12</div><div style="font-size:12px;font-weight:700;color:#7c99b6">Competitive events</div></div>
+        </div>
+      </div>
+      <div style="background:linear-gradient(160deg,#0e3a63,#1366b3);border-radius:10px;padding:30px;color:#fff;position:relative;overflow:hidden">
+        <div style="font-weight:800;font-size:12px;letter-spacing:.6px;text-transform:uppercase;color:#9fd2f5;margin-bottom:10px">Sponsor us</div>
+        <h2 style="font-family:'Sora';font-weight:700;font-size:25px;margin-bottom:11px">Partner with BCA DECA</h2>
+        <p style="font-size:14.5px;line-height:1.6;color:#cfe6f7">Local businesses help send our members to States and ICDC. All sponsors get logo placement on chapter materials, conference shout-outs, and a thank-you in our season recap.<br><br>We're also offering access to our ABF talent, and sponsors may request promotional material designed by our marketing experts, a financial analysis of the business, and any other type of help that may be needed.&nbsp;<br><br>Please reach out to discuss details of becoming a sponsor.</p>
+        <div style="margin-top:20px;display:flex;flex-direction:column;gap:9px">
+          <div style="display:flex;align-items:center;gap:10px;font-size:14px;font-weight:700"><span style="font-size: 16px;">✉️</span>Advisor: <a href="mailto:josgut@bergen.org" style="color:#9fd2f5;font-weight:800">josgut@bergen.org</a></div>
+          <div style="display:flex;align-items:center;gap:10px;font-size:14px;font-weight:700"><span style="font-size:16px">📍</span> 200 Hackensack Ave, Hackensack NJ</div>
+        </div>
+        <button style="margin-top:22px;border:none;cursor:pointer;font-family:'Sora';font-weight:700;font-size:15px;color:#0e3a63;background:#ffd23f;padding:12px 20px;border-radius:7px;box-shadow:0 5px 0 #d9a800">Become a sponsor</button>
+      </div>
+    </section>
+  </main>
+  </sc-if>
+
+  <!-- ===== MEMBERS (continuous scroll) ===== -->
+  <sc-if value="{{ isMembers }}" hint-placeholder-val="{{ false }}">
+  <div style="flex:1;max-width:1180px;width:100%;margin:0 auto;padding:20px 18px 40px;display:grid;grid-template-columns:218px 1fr;gap:20px;align-items:start">
+
+    <!-- members subnav -->
+    <aside style="position:sticky;top:78px;background:#fff;border:2px solid #e3eef8;border-radius:9px;padding:10px;display:flex;flex-direction:column;gap:3px">
+      <div style="font-weight:800;font-size:10.5px;letter-spacing:.6px;text-transform:uppercase;color:#9bb4cc;padding:9px 11px 5px">Members</div>
+      <button onClick="{{ navAnnounce }}" style="text-align:left;border:none;cursor:pointer;font-family:'Nunito';font-weight:800;font-size:14px;padding:11px 12px;border-radius:6px;display:flex;align-items:center;gap:10px;background:{{ announceBg }};color:{{ announceColor }}"><span style="font-size:16px">📣</span> Announcements</button>
+      <button onClick="{{ navResources }}" style="text-align:left;border:none;cursor:pointer;font-family:'Nunito';font-weight:800;font-size:14px;padding:11px 12px;border-radius:6px;display:flex;align-items:center;gap:10px;background:{{ resourcesBg }};color:{{ resourcesColor }}"><span style="font-size:16px">📚</span> Resources</button>
+      <button onClick="{{ navSeason }}" style="text-align:left;border:none;cursor:pointer;font-family:'Nunito';font-weight:800;font-size:14px;padding:11px 12px;border-radius:6px;display:flex;align-items:center;gap:10px;background:{{ seasonBg }};color:{{ seasonColor }}"><span style="font-size:16px">📅</span> Season 26–27</button>
+    </aside>
+
+    <section style="min-width:0" ref="{{ membersScrollRef }}">
+      <div id="sec-announce" style="scroll-margin-top:90px">{{ announceNode }}</div>
+      <div id="sec-resources" style="scroll-margin-top:90px;margin-top:40px">{{ borrowNode }}</div>
+      <div id="sec-season" style="scroll-margin-top:90px;margin-top:40px">{{ seasonNode }}</div>
+    </section>
+  </div>
+  </sc-if>
+
+  <!-- ===== PREP (top-level) ===== -->
+  <sc-if value="{{ isPrepTab }}" hint-placeholder-val="{{ false }}">
+  <div style="flex:1;max-width:1180px;width:100%;margin:0 auto;padding:20px 18px 40px">{{ prepNode }}</div>
+  </sc-if>
+
+  <!-- ===== PAST CONFERENCES (top-level) ===== -->
+  <sc-if value="{{ isPastTab }}" hint-placeholder-val="{{ false }}">
+  <div style="flex:1;max-width:1180px;width:100%;margin:0 auto;padding:20px 18px 40px">{{ pastNode }}</div>
+  </sc-if>
+
+</div>
+
+{{ questionOverlay }}
+{{ kpiPickerModal }}
+{{ toastNode }}
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;schoolName&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Bergen County Academies&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  constructor(props){
+    super(props);
+    const h = React.createElement;
+    this.COLORS = ['#ef6f6c','#f59e3a','#f5c842','#8bd24f','#46c4a0','#3db4f2','#5a8df0','#9b7bf0','#d471e0','#ee6aa8','#e0944b','#6fd0d6','#7bbf57','#4f9bd9','#c06bf0','#f0746a','#5cc28f','#e89b3d','#5d7fe8','#cf6fc4'];
+    this.NAMES = ['Selvi A.','Abigail A.','Pranavi A.','Tyler B.','Irem B.','Jeremy C.','Grace C.','Ayden C.','Kierra D.','Joaquin D.','Addison H.','Michael H.','Lucas J.','Yasemin K.','Ryan M.','Niran P.','Philip R.','Matteo S.','Aahana T.','Dante V.'];
+    const startXP = [1480,1290,1120,1010,920,840,760,690,610,560,500,460,410,360,310,270,230,190,150,120];
+    const me = 8; // your starting slot index (will be re-ranked by xp)
+    const members = this.NAMES.map((n,i)=>({id:'m'+i,name:n,xp:startXP[i],color:this.COLORS[i],isMe:false}));
+    // turn one slot into "You"
+    const myXp = 530;
+    members.splice(8,1,{id:'me',name:'You',xp:myXp,color:'#ffd23f',isMe:true});
+    // pad back to 20 (we removed one named member, add a replacement)
+    members.push({id:'m20',name:'Edward W.',xp:95,color:'#7bbf57',isMe:false});
+
+    this.SHOP = [
+      {id:'beanie',icon:'🧢',name:'Beanie',price:30,slot:'hat',kind:'outfit'},
+      {id:'tophat',icon:'🎩',name:'Top Hat',price:45,slot:'hat',kind:'outfit'},
+      {id:'crown',icon:'👑',name:'Gold Crown',price:90,slot:'hat',kind:'outfit'},
+      {id:'grad',icon:'🎓',name:'Grad Cap',price:60,slot:'hat',kind:'outfit'},
+      {id:'shades',icon:'🕶️',name:'Sunglasses',price:35,slot:'eyes',kind:'outfit'},
+      {id:'scarfR',icon:'🧣',name:'Red Scarf',price:25,slot:'neck',kind:'outfit'},
+      {id:'bowtie',icon:'🎀',name:'Bow Tie',price:40,slot:'neck',kind:'outfit'},
+      {id:'briefcase',icon:'💼',name:'Briefcase',price:50,slot:'hand',kind:'outfit'},
+      {id:'diamond',icon:'💎',name:'DECA Diamond',price:110,slot:'hand',kind:'outfit'},
+      {id:'e-waddle',icon:'🐧',name:'Waddle',price:55,slot:'emote',kind:'emote',anim:'pwaddle .55s ease-in-out infinite alternate'},
+      {id:'e-party',icon:'🎉',name:'Party',price:95,slot:'emote',kind:'emote',anim:'pparty .4s ease-in-out infinite alternate'},
+      {id:'e-celebrate',icon:'🥳',name:'Celebrate',price:130,slot:'emote',kind:'emote',anim:'pcelebrate .6s ease-in-out infinite'},
+      {id:'e-star',icon:'⭐',name:'Starpower',price:170,slot:'emote',kind:'emote',anim:'pstar .7s ease-in-out infinite'},
+      {id:'pu-hint',icon:'💡',name:'Hint Pack ×3',price:40,slot:'power',kind:'power',pu:'hint',amt:3},
+      {id:'pu-double',icon:'✖️2',name:'Double Points',price:70,slot:'power',kind:'power',pu:'double',amt:1},
+      {id:'pu-freeze',icon:'❄️',name:'Streak Freeze',price:50,slot:'power',kind:'power',pu:'freeze',amt:1},
+    ];
+
+    this.SESSIONS = [
+      {id:'quick',type:'quick',n:5,time:'5 min',xp:50,dd:10},
+      {id:'cluster',type:'cluster',n:10,time:'10 min',xp:120,dd:22},
+      {id:'diag',type:'diagnostic',n:15,time:'15 min',xp:280,dd:45},
+      {id:'weak',type:'weakness',n:8,time:'8 min',xp:100,dd:20},
+    ];
+
+    this.QB = [
+      {q:"A balance sheet shows a company's financial condition by listing what it owns, owes, and its net worth — as of",a:["A full fiscal year","A specific point in time","The next quarter","A 5-year average"],c:1,area:"Financial Statements",cluster:"Finance",ex:"A balance sheet is a snapshot at one moment; the income statement covers a period."},
+      {q:"Revenue is $850,000, COGS is $510,000, operating expenses are $180,000. Net profit is",a:["$160,000","$340,000","$180,000","$670,000"],c:0,area:"Financial Statements",cluster:"Finance",ex:"$850k − $510k = $340k gross; $340k − $180k = $160k net."},
+      {q:"Reviewing each income-statement line item as a percentage of total revenue is",a:["Horizontal analysis","Vertical analysis","SWOT analysis","Break-even analysis"],c:1,area:"Financial Statements",cluster:"Finance",ex:"Vertical analysis expresses each item as a proportion of revenue."},
+      {q:"Penetration pricing — a low launch price to grab market share — is used during which product life-cycle stage?",a:["Growth","Maturity","Introduction","Decline"],c:2,area:"Pricing",cluster:"Marketing",ex:"Low introductory pricing drives rapid adoption at launch."},
+      {q:"A software firm sells its word processor, spreadsheet, and slides together for less than buying each. This is",a:["Price skimming","Penetration pricing","Product bundling","Loss-leader pricing"],c:2,area:"Pricing",cluster:"Marketing",ex:"Bundling packages multiple products at a combined discount."},
+      {q:"Segmenting a sports-drink market into casual exercisers, athletes, and weekend warriors is",a:["Demographic","Geographic","Psychographic","Behavioral"],c:3,area:"Market Planning",cluster:"Marketing",ex:"Behavioral segmentation divides by usage and behavior patterns."},
+      {q:"A situational analysis in a marketing plan primarily identifies",a:["The promotional budget","Strengths, weaknesses, opportunities, threats","Channel partners","Sales forecasts"],c:1,area:"Market Planning",cluster:"Marketing",ex:"Situational analysis is essentially a SWOT of the firm's position."},
+      {q:"The most common distribution channel for consumer goods is",a:["Producer→agent→consumer","Producer→wholesaler→retailer→consumer","Retailer→wholesaler→producer","Producer→retailer→agent"],c:1,area:"Channel Management",cluster:"Marketing",ex:"Producer → wholesaler → retailer → consumer is the standard path."},
+      {q:"The primary goal of institutional (corporate) promotion is to",a:["Sell a specific product","Build a favorable company image","Explain a service's features","Respond to bad press"],c:1,area:"Promotion",cluster:"Marketing",ex:"Institutional promotion builds image and goodwill, not a single sale."},
+      {q:"Mirroring a client's communication pace and tone to make them comfortable is",a:["Deceptive communication","Building rapport","Passive-aggression","Aggressive style"],c:1,area:"Communication",cluster:"Business Management",ex:"Matching style builds rapport and trust."},
+      {q:"Working capital management focuses primarily on",a:["Long-term equity","Short-term assets and liabilities","Issuing stock","Acquisitions"],c:1,area:"Financial Management",cluster:"Finance",ex:"It manages current assets/liabilities — cash, receivables, payables, inventory."},
+      {q:"A company's roof collapses in a storm, halting operations for weeks. This is",a:["Financial risk","Strategic risk","Operational risk","Legal risk"],c:2,area:"Risk Management",cluster:"Business Management",ex:"Operational risk threatens day-to-day activities."},
+      {q:"Trading securities on material non-public information is",a:["Affinity fraud","Insider trading","Phishing","A pump and dump"],c:1,area:"Ethics",cluster:"Business Management",ex:"Insider trading uses confidential, market-moving information."},
+      {q:"When an economy enters expansion, businesses typically",a:["Cut inventory","Reduce capital investment","Invest in plants & equipment","Slash prices"],c:2,area:"Economics",cluster:"Entrepreneurship",ex:"Producer confidence rises, driving investment in capacity."},
+      {q:"A government restricting imports to protect domestic industry is practicing",a:["Free trade","Protectionism","Arbitration","Monetary policy"],c:1,area:"Economics",cluster:"Entrepreneurship",ex:"Protectionism uses tariffs and quotas to shield domestic firms."},
+      {q:"Separation of duties — so no one person both authorizes and records a transaction — is a(n)",a:["External control","Regulatory control","Internal control","Market control"],c:2,area:"Operations",cluster:"Business Management",ex:"It's an internal control that reduces fraud risk."},
+      {q:"Future value of money requires three inputs:",a:["Revenue, expenses, margin","Present value, interest rate, time","Net income, dividends, equity","Price, book value, yield"],c:1,area:"Financial Analysis",cluster:"Finance",ex:"FV = PV × (1+i)^n needs PV, rate, and periods."},
+      {q:"An employee who takes on extra work to help a teammate without being asked shows",a:["Conformity","Initiative","Herd mentality","Passivity"],c:1,area:"Emotional Intelligence",cluster:"Hospitality & Tourism",ex:"Initiative is acting proactively without being told."},
+    ];
+
+    this.KPI_AREAS = Array.from(new Set(this.QB.map(q=>q.area)));
+    this.CLUSTERS = Array.from(new Set(this.QB.map(q=>q.cluster)));
+    this.state = {
+      tab:'home', sub:'announce', prepView:'arena', sideTab:'practice', kpiFilter:null, pendingSession:null,
+      members,
+      totalXp: myXp, level:3, xpNext:600, xpInLevel:230, dd:260, streak:5,
+      equipped:{hat:null,eyes:null,neck:'scarfR',hand:null,emote:null},
+      owned:['scarfR'],
+      powers:{hint:0,double:0,freeze:0},
+      doubleArmed:false,
+      wrongLog:[], kpi:{},
+      session:null, picked:null, answered:false, hideOpts:[],
+      toast:null,
+    };
+    this._rects = {};
+    this._snip = null;
+  }
+
+  componentDidMount(){
+    this._iv = setInterval(()=>this.botShift(), 5200);
+    this._onScroll = ()=>this.updateActiveSection();
+    window.addEventListener('scroll', this._onScroll, {passive:true});
+  }
+  componentWillUnmount(){ clearInterval(this._iv); window.removeEventListener('scroll', this._onScroll); }
+
+  updateActiveSection(){
+    if(this.state.tab!=='members') return;
+    const ids=['sec-announce','sec-resources','sec-season'];
+    const keys=['announce','resources','season'];
+    let best=null,bestTop=-Infinity;
+    ids.forEach((id,i)=>{
+      const el=document.getElementById(id); if(!el) return;
+      const top=el.getBoundingClientRect().top;
+      if(top<=110 && top>bestTop){ bestTop=top; best=keys[i]; }
+    });
+    if(best && best!==this.state.sub) this.setState({sub:best});
+  }
+
+  scrollToSection(id,key){
+    this.setState({sub:key});
+    const el=document.getElementById(id);
+    if(el) el.scrollIntoView({behavior:'smooth',block:'start'});
+  }
+
+  // ---------- helpers ----------
+  myMember(){ return this.state.members.find(m=>m.isMe); }
+  ranked(){ return this.state.members.slice().sort((a,b)=>b.xp-a.xp); }
+  icon(id){ const it=this.SHOP.find(x=>x.id===id); return it?it.icon:''; }
+
+  toast(node){ this.setState({toast:node}); clearTimeout(this._tt); this._tt=setTimeout(()=>this.setState({toast:null}),3000); }
+
+  // ---------- FLIP leaderboard ----------
+  getSnapshotBeforeUpdate(){
+    const m={};
+    document.querySelectorAll('[data-pod]').forEach(el=>{ m[el.getAttribute('data-pod')]=el.getBoundingClientRect().left; });
+    return m;
+  }
+  componentDidUpdate(_p,_s,snap){
+    if(!snap) return;
+    document.querySelectorAll('[data-pod]').forEach(el=>{
+      const id=el.getAttribute('data-pod'); const prev=snap[id];
+      if(prev==null) return;
+      const cur=el.getBoundingClientRect().left;
+      const dx=prev-cur;
+      if(Math.abs(dx)>2){
+        el.style.transition='none'; el.style.transform='translateX('+dx+'px)';
+        requestAnimationFrame(()=>requestAnimationFrame(()=>{
+          el.style.transition='transform .65s cubic-bezier(.34,1.25,.4,1)';
+          el.style.transform='translateX(0)';
+        }));
+      }
+    });
+  }
+
+  botShift(){
+    if(this.state.tab!=='prep' || this.state.prepView!=='arena') return;
+    if(Math.random()>0.62) return;
+    const ms=this.state.members.slice();
+    const bots=ms.filter(m=>!m.isMe);
+    const t=bots[Math.floor(Math.random()*bots.length)];
+    const gain=Math.random()>0.32;
+    const d=Math.floor(Math.random()*34)+8;
+    t.xp = gain ? t.xp+d : Math.max(60,t.xp-d);
+    this.setState({members:ms});
+  }
+
+  // ---------- navigation ----------
+  go(patch){ this.setState(patch); }
+
+  // ---------- sessions ----------
+  startSession(sess){
+    let base=this.QB;
+    if(sess.type==='cluster' && this.state.kpiFilter) base=this.QB.filter(q=>q.cluster===this.state.kpiFilter);
+    else if(sess.type==='weakness'){
+      const areas=Array.from(new Set(this.state.wrongLog.map(w=>w.area)));
+      base = areas.length ? this.QB.filter(q=>areas.includes(q.area)) : this.QB;
+    }
+    const pool=(base.length?base:this.QB).slice().sort(()=>Math.random()-0.5);
+    const queue=[]; while(queue.length<sess.n){ queue.push(pool[queue.length%pool.length]); }
+    this.setState({session:{...sess,queue,idx:0,correct:0,gainedXp:0,gainedDd:0}, picked:null, answered:false, hideOpts:[]});
+  }
+  useHint(){
+    if(this.state.answered) return;
+    if(this.state.powers.hint<=0) return;
+    const s=this.state.session; const q=s.queue[s.idx];
+    const wrong=q.a.map((_,i)=>i).filter(i=>i!==q.c).sort(()=>Math.random()-0.5).slice(0,2);
+    this.setState({hideOpts:wrong, powers:{...this.state.powers,hint:this.state.powers.hint-1}});
+  }
+  pick(i){
+    if(this.state.answered) return;
+    const s=this.state.session; const q=s.queue[s.idx];
+    const correct = i===q.c;
+    const kpi={...this.state.kpi};
+    kpi[q.area]=kpi[q.area]||{c:0,t:0}; kpi[q.area]={c:kpi[q.area].c+(correct?1:0),t:kpi[q.area].t+1};
+    let wrongLog=this.state.wrongLog;
+    if(!correct){ wrongLog=wrongLog.concat([{q:q.q,area:q.area,you:q.a[i],right:q.a[q.c],ex:q.ex}]); }
+    const ns={...s};
+    if(correct){ ns.correct++; const mult=this.state.doubleArmed?2:1; ns.gainedXp+=12*mult; ns.gainedDd+=2*mult; }
+    this.setState({picked:i,answered:true,session:ns,kpi,wrongLog});
+  }
+  nextQ(){
+    const s=this.state.session;
+    if(s.idx+1>=s.queue.length){ this.finishSession(); return; }
+    this.setState({session:{...s,idx:s.idx+1},picked:null,answered:false,hideOpts:[]});
+  }
+  finishSession(){
+    const s=this.state.session;
+    const ms=this.state.members.slice();
+    const me=ms.find(m=>m.isMe);
+    const bonus = s.correct===s.queue.length ? Math.round(s.xp*0.3) : 0;
+    const totalGain = s.gainedXp + bonus;
+    const ddGain = s.gainedDd + (bonus?5:0);
+    me.xp += totalGain;
+    let totalXp=this.state.totalXp+totalGain;
+    let xpInLevel=this.state.xpInLevel+totalGain, level=this.state.level, xpNext=this.state.xpNext;
+    while(xpInLevel>=xpNext){ xpInLevel-=xpNext; level++; xpNext=Math.round(xpNext*1.18); }
+    this.setState({
+      members:ms, totalXp, level, xpInLevel, xpNext,
+      dd:this.state.dd+ddGain, streak:this.state.streak,
+      doubleArmed:false,
+      session:null, picked:null, answered:false, hideOpts:[],
+    });
+    this.toast(this.toastEl('Session complete! '+s.correct+'/'+s.queue.length+' correct', '+'+totalGain+' XP · +'+ddGain+' DECA$', '#58c47b','🎉'));
+    // scroll you into view
+    setTimeout(()=>{ const el=document.querySelector('[data-pod="me"]'); if(el) el.scrollIntoView({block:'nearest',inline:'center',behavior:'smooth'}); },120);
+  }
+
+  // ---------- shop ----------
+  shopAction(item){
+    const owned=this.state.owned.includes(item.id);
+    if(item.kind==='power'){
+      if(this.state.dd<item.price){ this.toast(this.toastEl('Not enough DECA$','Earn more in the Arena','#ef6f6c','💰')); return; }
+      const powers={...this.state.powers}; powers[item.pu]+=item.amt;
+      const arm = item.pu==='double' ? {doubleArmed:true} : {};
+      this.setState({dd:this.state.dd-item.price,powers,...arm});
+      this.toast(this.toastEl('Bought '+item.name,'Use it in your next session','#58c47b','✅'));
+      return;
+    }
+    const eq={...this.state.equipped};
+    if(eq[item.slot]===item.id){ eq[item.slot]=null; this.setState({equipped:eq}); return; }
+    if(owned){ eq[item.slot]=item.id; this.setState({equipped:eq}); return; }
+    if(this.state.dd<item.price){ this.toast(this.toastEl('Not enough DECA$','Earn more in the Arena','#ef6f6c','💰')); return; }
+    eq[item.slot]=item.id;
+    this.setState({dd:this.state.dd-item.price,owned:this.state.owned.concat([item.id]),equipped:eq});
+    this.toast(this.toastEl('Unlocked '+item.name,'Equipped on your penguin','#58c47b','🛍️'));
+  }
+
+  // ========== RENDER NODES ==========
+  toastEl(title,sub,color,emoji){
+    const h=React.createElement;
+    return h('div',{key:Math.random(),style:{position:'fixed',bottom:24,right:24,zIndex:200,background:'#fff',border:'2px solid '+color,borderRadius:8,padding:'13px 18px',boxShadow:'0 12px 34px rgba(20,80,150,.22)',animation:'toastIn .3s ease',display:'flex',alignItems:'center',gap:12,maxWidth:300}},
+      h('div',{style:{fontSize:24}},emoji),
+      h('div',null,
+        h('div',{style:{fontWeight:800,fontSize:14,color:'#0e3a63'}},title),
+        h('div',{style:{fontWeight:700,fontSize:12.5,color:color}},sub)));
+  }
+
+  penguin(m){
+    const h=React.createElement;
+    const eq = m.isMe ? this.state.equipped : {};
+    const neckId = m.isMe ? eq.neck : null;
+    const base={position:'absolute'};
+    const scarfColor = neckId==='scarfR' ? '#e8483f' : m.color;
+    const kids=[];
+    // hat
+    if(m.isMe && eq.hat) kids.push(h('div',{key:'hat',style:{position:'absolute',top:-16,left:'50%',transform:'translateX(-50%)',fontSize:22,zIndex:10,lineHeight:1}},this.icon(eq.hat)));
+    // wings
+    kids.push(h('div',{key:'wl',style:{...base,top:30,left:0,width:11,height:21,background:'radial-gradient(ellipse at 50% 30%,#3a3f46,#1d2227)',borderRadius:'40% 60% 60% 40%',transform:'rotate(-16deg)',zIndex:0}}));
+    kids.push(h('div',{key:'wr',style:{...base,top:30,right:0,width:11,height:21,background:'radial-gradient(ellipse at 50% 30%,#3a3f46,#1d2227)',borderRadius:'40% 60% 60% 40%',transform:'rotate(16deg) scaleX(-1)',zIndex:0}}));
+    // body
+    kids.push(h('div',{key:'body',style:{...base,bottom:0,left:'50%',transform:'translateX(-50%)',width:40,height:50,background:'radial-gradient(ellipse at 35% 28%,#3a3f46,#1b2026)',borderRadius:'50% 50% 45% 45%',zIndex:1}},
+      h('div',{style:{position:'absolute',bottom:5,left:'50%',transform:'translateX(-50%)',width:23,height:30,background:'radial-gradient(ellipse at 40% 32%,#ffffff,#e6edf2)',borderRadius:'50% 50% 45% 45%'}})));
+    // scarf (neck band) — everyone gets a colored scarf for identity
+    kids.push(h('div',{key:'scarf',style:{...base,top:27,left:'50%',transform:'translateX(-50%)',width:30,height:8,background:scarfColor,borderRadius:3,zIndex:4,boxShadow:'inset 0 -2px 0 rgba(0,0,0,.15)'}}));
+    if(m.isMe && eq.neck==='bowtie') kids.push(h('div',{key:'bow',style:{...base,top:25,left:'50%',transform:'translateX(-50%)',fontSize:13,zIndex:5,lineHeight:1}},'🎀'));
+    // head
+    kids.push(h('div',{key:'head',style:{...base,top:0,left:'50%',transform:'translateX(-50%)',width:34,height:34,background:'radial-gradient(ellipse at 38% 30%,#42474e,#1b2026)',borderRadius:'50%',zIndex:3}},
+      h('div',{style:{position:'absolute',top:11,left:6,width:6,height:7,background:'#fff',borderRadius:'50%'}},h('div',{style:{position:'absolute',top:2,left:1.5,width:3,height:3,background:'#15181c',borderRadius:'50%'}})),
+      h('div',{style:{position:'absolute',top:11,right:6,width:6,height:7,background:'#fff',borderRadius:'50%'}},h('div',{style:{position:'absolute',top:2,left:1.5,width:3,height:3,background:'#15181c',borderRadius:'50%'}})),
+      h('div',{style:{position:'absolute',top:19,left:'50%',transform:'translateX(-50%)',width:8,height:6,background:'#f5a623',clipPath:'polygon(50% 100%,0 0,100% 0)'}}),
+      (m.isMe && eq.eyes) ? h('div',{style:{position:'absolute',top:8,left:'50%',transform:'translateX(-50%)',fontSize:16,zIndex:6,lineHeight:1}},this.icon(eq.eyes)) : null
+    ));
+    // feet
+    kids.push(h('div',{key:'feet',style:{...base,bottom:-4,left:'50%',transform:'translateX(-50%)',display:'flex',gap:5,zIndex:5}},
+      h('div',{style:{width:12,height:6,background:'#f5a623',borderRadius:'40% 40% 50% 50%'}}),
+      h('div',{style:{width:12,height:6,background:'#f5a623',borderRadius:'40% 40% 50% 50%'}})));
+    // hand item
+    if(m.isMe && eq.hand) kids.push(h('div',{key:'hand',style:{position:'absolute',bottom:2,right:-14,fontSize:16,zIndex:10,lineHeight:1}},this.icon(eq.hand)));
+    return h('div',{style:{position:'relative',width:50,height:68}},kids);
+  }
+
+  podium(m,maxXP,rank){
+    const h=React.createElement;
+    const minH=26,maxH=210;
+    const ht=Math.round(minH+(m.xp/maxXP)*(maxH-minH));
+    const w = rank===1?92:rank<=3?80:rank<=6?68:56;
+    const scale = rank===1?1.08:rank<=3?0.98:rank<=6?0.86:0.74;
+    const emote = m.isMe ? this.SHOP.find(s=>s.id===this.state.equipped.emote) : null;
+    const anim = emote ? emote.anim : ('pfloat '+(2.6+rank*0.13)+'s ease-in-out infinite');
+    const medal = rank===1?'🥇':rank===2?'🥈':rank===3?'🥉':null;
+    const iceGrad = m.isMe ? 'linear-gradient(180deg,#fff4c4,#ffe27a 55%,#f4c63a)' : 'linear-gradient(180deg,#eaf8ff,#bfe6fb 55%,#8fcdf0)';
+    const iceBorder = m.isMe ? '#f0bd2e' : '#cdeafc';
+    return h('div',{key:m.id,'data-pod':m.id,style:{flex:'0 0 auto',width:118,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'flex-end'}},
+      h('div',{style:{display:'flex',flexDirection:'column',alignItems:'center',marginBottom:5}},
+        medal?h('div',{style:{fontSize:rank===1?24:19,lineHeight:1,marginBottom:1,filter:'drop-shadow(0 2px 2px rgba(0,0,0,.15))'}},medal):null,
+        h('div',{style:{fontWeight:800,fontSize:m.isMe?13:12,color:m.isMe?'#b07d05':'#0e3a63',whiteSpace:'nowrap'}},m.name,m.isMe?' ★':''),
+        h('div',{style:{fontWeight:800,fontSize:11,color:m.isMe?'#c79100':'#5a86b0'}},'⚡ '+m.xp)
+      ),
+      h('div',{style:{transform:'scale('+scale+')',transformOrigin:'bottom center'}},
+        h('div',{style:{animation:anim,transformOrigin:'bottom center'}}, this.penguin(m))),
+      h('div',{style:{position:'relative',width:w,height:ht,background:iceGrad,border:'2px solid '+iceBorder,borderBottom:'none',borderRadius:'10px 10px 0 0',marginTop:3,boxShadow:'inset 0 8px 12px rgba(255,255,255,.55), 0 6px 14px rgba(40,120,200,.12)',transition:'height .5s cubic-bezier(.34,1.2,.4,1)'}},
+        h('div',{style:{position:'absolute',top:6,left:7,width:6,height:Math.max(10,ht*0.4),background:'rgba(255,255,255,.6)',borderRadius:3}}),
+        h('div',{style:{position:'absolute',top:8,left:'50%',transform:'translateX(-50%)',fontWeight:800,fontSize:13,color:m.isMe?'rgba(120,90,0,.6)':'rgba(40,110,170,.55)'}}, rank)
+      )
+    );
+  }
+
+  arena(){
+    const h=React.createElement;
+    const ranked=this.ranked();
+    const maxXP=ranked[0].xp;
+    const podiums=ranked.map((m,i)=>this.podium(m,maxXP,i+1));
+    // internal prep nav
+    const tabBtn=(id,label,icon)=>{
+      const on=this.state.prepView===id;
+      return h('button',{key:id,onClick:()=>this.setState({prepView:id}),style:{border:'none',cursor:'pointer',fontFamily:'Nunito',fontWeight:800,fontSize:13,padding:'8px 15px',borderRadius:5,background:on?'#28a3ee':'#fff',color:on?'#fff':'#3f86bf',boxShadow:on?'0 3px 0 #1366b3':'0 2px 0 #d7e8f5'}},icon+' '+label);
+    };
+    return h('div',null,
+      h('div',{style:{display:'flex',gap:8,marginBottom:14,flexWrap:'wrap'}},
+        tabBtn('arena','Arena','🧊'),tabBtn('diagnostic','Diagnostic','📊'),tabBtn('events','Event Resources','📁'),tabBtn('profile','My Profile','👤')),
+      this.state.prepView==='arena'?this.arenaMain(podiums):null,
+      this.state.prepView==='diagnostic'?this.diagnostic():null,
+      this.state.prepView==='events'?this.eventResources():null,
+      this.state.prepView==='profile'?this.profile():null
+    );
+  }
+
+  arenaMain(podiums){
+    const h=React.createElement;
+    return h('div',{style:{display:'grid',gridTemplateColumns:'300px 1fr',gap:16,alignItems:'start'}},
+      this.sidebar(),
+      // ocean
+      h('div',{style:{background:'#fff',border:'2px solid #e3eef8',borderRadius:9,overflow:'hidden'}},
+        h('div',{style:{padding:'14px 18px',borderBottom:'2px solid #eef5fb',display:'flex',alignItems:'center',justifyContent:'space-between'}},
+          h('div',null,
+            h('div',{style:{fontFamily:'Sora',fontWeight:700,fontSize:18,color:'#0e3a63'}},'The Leaderboard')),
+          h('div',{style:{fontSize:12,fontWeight:800,color:'#1c7fc4',background:'#e9f6ff',border:'1.5px solid #bfe2fa',borderRadius:10,padding:'5px 12px'}},this.state.members.length+' members')
+        ),
+        h('div',{style:{position:'relative',height:430,background:'linear-gradient(180deg,#d6efff 0%,#eaf8ff 55%,#cdebfb 100%)'}},
+          // sun
+          h('div',{style:{position:'absolute',top:26,right:40,width:54,height:54,borderRadius:'50%',background:'radial-gradient(circle,#fff3b0,#ffe27a)',boxShadow:'0 0 36px rgba(255,220,110,.7)'}}),
+          // water
+          h('div',{style:{position:'absolute',left:0,right:0,bottom:0,height:90,background:'linear-gradient(180deg,#5cb8ef,#2f97e0)',borderTop:'3px solid rgba(255,255,255,.5)',zIndex:1}}),
+          // scroll row
+          h('div',{style:{position:'absolute',inset:0,overflowX:'auto',overflowY:'hidden',display:'flex',alignItems:'flex-end',gap:6,padding:'18px 26px 70px',zIndex:2}},podiums)
+        )
+      )
+    );
+  }
+
+  sidebar(){
+    const h=React.createElement;
+    const tab=this.state.sideTab;
+    const tabBtn=(id,label)=>{
+      const on=tab===id;
+      return h('button',{key:id,onClick:()=>this.setState({sideTab:id}),style:{flex:1,border:'none',cursor:'pointer',fontFamily:'Nunito',fontWeight:800,fontSize:12.5,padding:'8px 4px',borderRadius:5,background:on?'#0e3a63':'transparent',color:on?'#fff':'#5d7894'}},label);
+    };
+    return h('div',{style:{background:'#fff',border:'2px solid #e3eef8',borderRadius:9,padding:12,position:'sticky',top:78}},
+      h('div',{style:{display:'flex',gap:4,background:'#f0f6fb',borderRadius:6,padding:4,marginBottom:12}},
+        tabBtn('practice','Practice'),tabBtn('missed','Missed ('+this.state.wrongLog.length+')'),tabBtn('shop','Shop')),
+      h('div',{style:{maxHeight:430,overflowY:'auto',paddingRight:2}},
+        tab==='practice'?this.practiceList():tab==='missed'?this.missedList():this.shopGrid())
+    );
+  }
+
+  practiceList(){
+    const h=React.createElement;
+    const tagColor={quick:'#58c47b',cluster:'#28a3ee',diagnostic:'#9b7bf0'};
+    return h('div',null,
+      this.state.doubleArmed?h('div',{style:{background:'#f3ecff',border:'1.5px solid #d6c4f7',borderRadius:5,padding:'8px 11px',marginBottom:10,fontSize:12,fontWeight:800,color:'#7a4fd0'}},'✖️2 Double Points armed for your next session'):null,
+      h('div',{style:{fontSize:10.5,fontWeight:800,letterSpacing:'.5px',textTransform:'uppercase',color:'#9bb4cc',marginBottom:9}},'Earn XP & DECA$'),
+      this.SESSIONS.map(s=>{
+        const disabled = s.type==='weakness' && !this.state.wrongLog.length;
+        const tagLabel = s.type==='weakness'?'weak spots':s.type;
+        const onClick=()=>{
+          if(disabled) return;
+          if(s.type==='cluster') this.setState({pendingSession:s,kpiFilter:null});
+          else this.startSession(s);
+        };
+        return h('div',{key:s.id,onClick,style:{cursor:disabled?'default':'pointer',opacity:disabled?0.45:1,border:'2px solid #e8f1f9',borderRadius:7,padding:13,marginBottom:9,transition:'border-color .15s,transform .1s'},onMouseEnter:e=>{if(!disabled){e.currentTarget.style.borderColor='#9cd0f3';e.currentTarget.style.transform='translateY(-1px)';}},onMouseLeave:e=>{e.currentTarget.style.borderColor='#e8f1f9';e.currentTarget.style.transform='none';}},
+        h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:6}},
+          h('span',{style:{fontSize:9.5,fontWeight:800,letterSpacing:'.5px',textTransform:'uppercase',color:'#fff',background:tagColor[s.type]||'#ef6f6c',borderRadius:3,padding:'3px 7px'}},tagLabel),
+          h('span',{style:{fontSize:11,fontWeight:700,color:'#9bb4cc'}},s.time)),
+        h('div',{style:{fontFamily:'Sora',fontWeight:700,fontSize:17,color:'#0e3a63',marginBottom:9}},disabled?'Answer questions first!':s.n+' questions'),
+        h('div',{style:{display:'flex',gap:7}},
+          h('span',{style:{fontSize:11.5,fontWeight:800,color:'#1c7fc4',background:'#e9f6ff',borderRadius:4,padding:'4px 9px'}},'⚡ +'+s.xp),
+          h('span',{style:{fontSize:11.5,fontWeight:800,color:'#b07d05',background:'#fff8e6',borderRadius:4,padding:'4px 9px'}},'💰 +'+s.dd))
+      );})
+    );
+  }
+
+  kpiPickerModal(){
+    const h=React.createElement;
+    const s=this.state.pendingSession; if(!s) return null;
+    const kf=this.state.kpiFilter;
+    const pillStyle=(on)=>({border:'1.5px solid '+(on?'#28a3ee':'#e8f1f9'),background:on?'#e9f6ff':'#fff',color:on?'#1c6aa8':'#5d7894'});
+    return h('div',{style:{position:'fixed',inset:0,zIndex:300,background:'rgba(14,58,99,.55)',backdropFilter:'blur(4px)',display:'flex',alignItems:'center',justifyContent:'center',padding:20},onClick:()=>this.setState({pendingSession:null})},
+      h('div',{style:{background:'#fff',borderRadius:14,width:'100%',maxWidth:420,padding:24,boxShadow:'0 30px 70px rgba(10,40,80,.35)',animation:'pop .25s ease'},onClick:e=>e.stopPropagation()},
+        h('div',{style:{fontFamily:'Sora',fontWeight:700,fontSize:19,color:'#0e3a63',marginBottom:3}},'Choose a focus'),
+        h('div',{style:{fontSize:13,fontWeight:600,color:'#7c99b6',marginBottom:16}},s.n+' questions · '+s.time),
+        h('div',{style:{display:'flex',flexWrap:'wrap',gap:7,marginBottom:20}},
+          [h('button',{key:'shuffle',onClick:()=>this.setState({kpiFilter:null}),style:{...pillStyle(!kf),cursor:'pointer',fontFamily:'Nunito',fontWeight:800,fontSize:12.5,borderRadius:20,padding:'7px 13px'}},'🔀 Shuffle')]
+          .concat(this.CLUSTERS.map(a=>h('button',{key:a,onClick:()=>this.setState({kpiFilter:a}),style:{...pillStyle(kf===a),cursor:'pointer',fontFamily:'Nunito',fontWeight:800,fontSize:12.5,borderRadius:20,padding:'7px 13px'}},a)))
+        ),
+        h('button',{onClick:()=>{const sess=this.state.pendingSession; this.setState({pendingSession:null}); this.startSession(sess);},style:{width:'100%',border:'none',cursor:'pointer',fontFamily:'Sora',fontWeight:700,fontSize:15,color:'#fff',background:'#28a3ee',padding:'13px',borderRadius:10,boxShadow:'0 4px 0 #1366b3'}},'Start session →')
+      )
+    );
+  }
+
+  missedList(){
+    const h=React.createElement;
+    if(!this.state.wrongLog.length) return h('div',{style:{textAlign:'center',padding:'34px 14px',color:'#9bb4cc'}},
+      h('div',{style:{fontSize:34,marginBottom:10}},'✅'),
+      h('div',{style:{fontSize:13,fontWeight:800,color:'#5d7894'}},'No misses yet!'),
+      h('div',{style:{fontSize:12,fontWeight:600,marginTop:3}},'Run a practice session to find your weak spots'));
+    return h('div',null,this.state.wrongLog.slice().reverse().map((w,i)=>h('div',{key:i,style:{background:'#fff4f3',border:'1.5px solid #f6d4d1',borderRadius:6,padding:12,marginBottom:9}},
+      h('div',{style:{fontSize:9.5,fontWeight:800,textTransform:'uppercase',letterSpacing:'.4px',color:'#d9534f',marginBottom:5}},w.area),
+      h('div',{style:{fontSize:12.5,fontWeight:700,color:'#3f4a55',lineHeight:1.4,marginBottom:7}},w.q),
+      h('div',{style:{fontSize:11.5,fontWeight:700,color:'#d9534f',marginBottom:2}},'✗ You: '+w.you),
+      h('div',{style:{fontSize:11.5,fontWeight:700,color:'#3a9d5d',marginBottom:6}},'✓ Correct: '+w.right),
+      h('div',{style:{fontSize:11,fontWeight:600,color:'#7c8a98',lineHeight:1.4,borderTop:'1px solid #f0dcda',paddingTop:6}},w.ex)
+    )));
+  }
+
+  shopGrid(){
+    const h=React.createElement;
+    const sec=(title,items)=>h('div',{key:title},
+      h('div',{style:{fontSize:10.5,fontWeight:800,letterSpacing:'.5px',textTransform:'uppercase',color:'#9bb4cc',margin:'4px 0 8px'}},title),
+      h('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8,marginBottom:6}},items.map(it=>{
+        const owned=this.state.owned.includes(it.id);
+        const eq=this.state.equipped[it.slot]===it.id;
+        let label,labelColor;
+        if(it.kind==='power'){ label='💰 '+it.price; labelColor='#b07d05'; }
+        else if(eq){ label='✓ On'; labelColor='#3a9d5d'; }
+        else if(owned){ label='▶ Use'; labelColor='#1c7fc4'; }
+        else { label='💰 '+it.price; labelColor='#b07d05'; }
+        const cnt = it.kind==='power'? this.state.powers[it.pu] : 0;
+        return h('div',{key:it.id,onClick:()=>this.shopAction(it),style:{cursor:'pointer',textAlign:'center',border:'2px solid '+(eq?'#9bd6a8':'#e8f1f9'),background:eq?'#effaf1':'#fff',borderRadius:7,padding:'11px 6px',transition:'transform .1s'},onMouseEnter:e=>e.currentTarget.style.transform='translateY(-2px)',onMouseLeave:e=>e.currentTarget.style.transform='none'},
+          h('div',{style:{fontSize:24,lineHeight:1,marginBottom:5,position:'relative'}},it.icon, cnt>0?h('span',{style:{position:'absolute',top:-4,right:'30%',background:'#58c47b',color:'#fff',fontSize:9,fontWeight:800,borderRadius:4,padding:'1px 5px'}},'×'+cnt):null),
+          h('div',{style:{fontSize:11.5,fontWeight:800,color:'#0e3a63',marginBottom:4}},it.name),
+          h('div',{style:{fontSize:11,fontWeight:800,color:labelColor}},label));
+      })));
+    return h('div',null,
+      sec('Outfits',this.SHOP.filter(i=>i.kind==='outfit')),
+      sec('Emotes',this.SHOP.filter(i=>i.kind==='emote')),
+      sec('Power-ups',this.SHOP.filter(i=>i.kind==='power')),
+      h('div',{style:{fontSize:10.5,fontWeight:700,color:'#a8bccd',marginTop:6,lineHeight:1.5}},'Tap an outfit/emote to equip · tap again to remove. Power-ups stack for sessions.'));
+  }
+
+  kpiScored(){
+    return Object.keys(this.state.kpi).map(a=>{const s=this.state.kpi[a];return {area:a,pct:s.t?Math.round(s.c/s.t*100):0,c:s.c,t:s.t};}).sort((x,y)=>y.pct-x.pct);
+  }
+
+  diagnostic(){
+    const h=React.createElement;
+    const scored=this.kpiScored();
+    return h('div',{style:{background:'#fff',border:'2px solid #e3eef8',borderRadius:9,padding:24}},
+      h('div',{style:{fontFamily:'Sora',fontWeight:700,fontSize:21,color:'#0e3a63',marginBottom:3}},'Diagnostic & KPIs'),
+      h('div',{style:{fontSize:13,fontWeight:700,color:'#7c99b6',marginBottom:20}},'Your accuracy per performance indicator, built from every question you answer'),
+      !scored.length
+        ? h('div',{style:{textAlign:'center',padding:'40px 16px',color:'#9bb4cc'}},h('div',{style:{fontSize:40,marginBottom:12}},'📊'),h('div',{style:{fontSize:15,fontWeight:800,color:'#5d7894'}},'No data yet'),h('div',{style:{fontSize:13,fontWeight:600,marginTop:4}},'Run the Full Diagnostic in the Arena to map your strengths and gaps'),h('button',{onClick:()=>this.setState({prepView:'arena',sideTab:'practice'}),style:{marginTop:18,border:'none',cursor:'pointer',fontFamily:'Sora',fontWeight:700,fontSize:14,color:'#fff',background:'#28a3ee',padding:'11px 20px',borderRadius:6,boxShadow:'0 4px 0 #1366b3'}},'Take the diagnostic →'))
+        : h('div',null,
+            h('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12,marginBottom:20}},
+              h('div',{style:{background:'#effaf1',border:'1.5px solid #b9e3c4',borderRadius:7,padding:14}},
+                h('div',{style:{fontSize:10,fontWeight:800,textTransform:'uppercase',letterSpacing:'.5px',color:'#3a9d5d',marginBottom:8}},'💪 Strongest'),
+                scored.slice(0,3).map(s=>h('div',{key:s.area,style:{display:'flex',justifyContent:'space-between',fontSize:12.5,fontWeight:700,color:'#3f5a4a',marginBottom:4}},h('span',null,s.area),h('span',{style:{color:'#3a9d5d'}},s.pct+'%')))),
+              h('div',{style:{background:'#fff4f3',border:'1.5px solid #f6d4d1',borderRadius:7,padding:14}},
+                h('div',{style:{fontSize:10,fontWeight:800,textTransform:'uppercase',letterSpacing:'.5px',color:'#d9534f',marginBottom:8}},'📚 Focus areas'),
+                scored.slice(-3).reverse().map(s=>h('div',{key:s.area,style:{display:'flex',justifyContent:'space-between',fontSize:12.5,fontWeight:700,color:'#5a4848',marginBottom:4}},h('span',null,s.area),h('span',{style:{color:'#d9534f'}},s.pct+'%'))))),
+            scored.map(s=>{const col=s.pct>=70?'#58c47b':s.pct>=40?'#f5b73a':'#ef6f6c';return h('div',{key:s.area,style:{marginBottom:11}},
+              h('div',{style:{display:'flex',justifyContent:'space-between',marginBottom:4}},h('span',{style:{fontSize:12.5,fontWeight:700,color:'#3f5a72'}},s.area),h('span',{style:{fontSize:12,fontWeight:800,color:col}},s.c+'/'+s.t+' · '+s.pct+'%')),
+              h('div',{style:{height:8,background:'#eef4f9',borderRadius:3,overflow:'hidden'}},h('div',{style:{height:'100%',width:s.pct+'%',background:col,borderRadius:3,transition:'width .8s ease'}})));}))
+    );
+  }
+
+  eventResources(){
+    const h=React.createElement;
+    const events=[
+      {e:'Principles of Marketing',cluster:'Marketing',links:['Cluster exam prep guide','100 PIs flashcard set','Sample role-play scenarios']},
+      {e:'Principles of Finance',cluster:'Finance',links:['Finance PI checklist','Ratio cheat sheet','Past written events']},
+      {e:'Entrepreneurship (ENT)',cluster:'Entrepreneurship',links:['Business plan rubric','Pitch deck template','Judge Q&A bank']},
+      {e:'Hospitality & Tourism',cluster:'Hospitality',links:['Service scenario pack','Cluster exam prep','Industry trends brief']},
+      {e:'Business Management & Admin',cluster:'Management',links:['Operations PI guide','Org behavior notes','Case study library']},
+    ];
+    return h('div',{style:{background:'#fff',border:'2px solid #e3eef8',borderRadius:9,padding:24}},
+      h('div',{style:{fontFamily:'Sora',fontWeight:700,fontSize:21,color:'#0e3a63',marginBottom:3}},'Resources by Event'),
+      h('div',{style:{fontSize:13,fontWeight:700,color:'#7c99b6',marginBottom:18}},'Study materials sorted by competitive event'),
+      h('div',{style:{display:'flex',flexDirection:'column',gap:11}},events.map(ev=>h('div',{key:ev.e,style:{border:'2px solid #eef5fb',borderRadius:7,padding:16}},
+        h('div',{style:{display:'flex',alignItems:'center',gap:9,marginBottom:10}},
+          h('span',{style:{fontSize:9.5,fontWeight:800,textTransform:'uppercase',letterSpacing:'.4px',color:'#1c7fc4',background:'#e9f6ff',borderRadius:3,padding:'3px 8px'}},ev.cluster),
+          h('span',{style:{fontFamily:'Sora',fontWeight:700,fontSize:16,color:'#0e3a63'}},ev.e)),
+        h('div',{style:{display:'flex',flexWrap:'wrap',gap:8}},ev.links.map(l=>h('a',{key:l,href:'#',onClick:e=>e.preventDefault(),style:{fontSize:12.5,fontWeight:700,color:'#1c6aa8',background:'#f4f9fd',border:'1.5px solid #dcebf8',borderRadius:5,padding:'7px 12px',textDecoration:'none',display:'inline-flex',alignItems:'center',gap:6}},'📄 '+l)))
+      )))
+    );
+  }
+
+  radarChart(scored){
+    const h=React.createElement;
+    if(scored.length<3) return h('div',{style:{fontSize:13,fontWeight:600,color:'#9bb4cc',padding:'20px 0'}},'Answer questions across at least 3 KPI areas to unlock your radar chart.');
+    const cx=140,cy=140,R=105;
+    const n=scored.length;
+    const pt=(i,r)=>{const ang=(Math.PI*2*i/n)-Math.PI/2; return [cx+r*Math.cos(ang), cy+r*Math.sin(ang)];};
+    const rings=[0.25,0.5,0.75,1].map(f=>{
+      const pts=scored.map((_,i)=>pt(i,R*f).join(',')).join(' ');
+      return h('polygon',{key:f,points:pts,fill:'none',stroke:'#e3eef8',strokeWidth:1});
+    });
+    const spokes=scored.map((s,i)=>{const [x,y]=pt(i,R); return h('line',{key:'sp'+i,x1:cx,y1:cy,x2:x,y2:y,stroke:'#e3eef8',strokeWidth:1});});
+    const dataPts=scored.map((s,i)=>pt(i,R*(s.pct/100))).map(p=>p.join(',')).join(' ');
+    const labels=scored.map((s,i)=>{const [x,y]=pt(i,R+26); return h('text',{key:'lb'+i,x,y,fontSize:11,fontWeight:700,fill:'#5d7894',textAnchor:'middle',dominantBaseline:'middle'},s.area.length>14?s.area.slice(0,13)+'…':s.area);});
+    return h('svg',{width:280,height:280,viewBox:'0 0 280 280'},
+      rings, spokes,
+      h('polygon',{points:dataPts,fill:'rgba(40,163,238,.22)',stroke:'#28a3ee',strokeWidth:2}),
+      labels
+    );
+  }
+
+  profile(){
+    const h=React.createElement;
+    const me=this.myMember();
+    const rank=this.ranked().findIndex(m=>m.isMe)+1;
+    const scored=this.kpiScored();
+    const stats=[['Rank','#'+rank],['Level',this.state.level],['Total XP',this.state.totalXp],['DECA$',this.state.dd],['Streak',this.state.streak+' 🔥'],['Items',this.state.owned.length]];
+    return h('div',{style:{background:'#fff',border:'2px solid #e3eef8',borderRadius:9,padding:24}},
+      h('div',{style:{display:'grid',gridTemplateColumns:'220px 1fr',gap:20,alignItems:'start'}},
+        h('div',{style:{background:'#f4f9fd',border:'2px solid #e3eef8',borderRadius:8,padding:'24px 18px',display:'flex',flexDirection:'column',alignItems:'center',gap:10}},
+          h('div',{style:{transform:'scale(1.5)',margin:'8px 0 14px'}},h('div',{style:{animation:'pfloat 3s ease-in-out infinite'}},this.penguin(me))),
+          h('div',{style:{fontFamily:'Sora',fontWeight:700,fontSize:19,color:'#0e3a63'}},'You'),
+          h('div',{style:{fontSize:12,fontWeight:800,color:'#b07d05',background:'#fff8e6',borderRadius:10,padding:'4px 12px'}},'Rank #'+rank+' of '+this.state.members.length),
+          h('button',{onClick:()=>this.setState({prepView:'arena',sideTab:'shop'}),style:{marginTop:6,border:'none',cursor:'pointer',fontFamily:'Nunito',fontWeight:800,fontSize:12.5,color:'#1c6aa8',background:'#e9f6ff',border:'1.5px solid #bfe2fa',borderRadius:5,padding:'8px 14px'}},'🛍️ Customize in Shop')),
+        h('div',null,
+          h('div',{style:{fontFamily:'Sora',fontWeight:700,fontSize:21,color:'#0e3a63',marginBottom:14}},'My Profile'),
+          h('div',{style:{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:10,marginBottom:18}},stats.map(s=>h('div',{key:s[0],style:{background:'#f4f9fd',borderRadius:6,padding:'12px 14px'}},h('div',{style:{fontSize:11,fontWeight:700,color:'#7c99b6'}},s[0]),h('div',{style:{fontFamily:'Sora',fontWeight:800,fontSize:20,color:'#0e3a63'}},s[1])))),
+          h('div',{style:{fontSize:11,fontWeight:800,textTransform:'uppercase',letterSpacing:'.5px',color:'#9bb4cc',marginBottom:8}},'Where you lose points'),
+          scored.length? scored.slice(-4).reverse().map(s=>{const col=s.pct>=70?'#58c47b':s.pct>=40?'#f5b73a':'#ef6f6c';return h('div',{key:s.area,style:{marginBottom:9}},h('div',{style:{display:'flex',justifyContent:'space-between',marginBottom:3}},h('span',{style:{fontSize:12.5,fontWeight:700,color:'#3f5a72'}},s.area),h('span',{style:{fontSize:12,fontWeight:800,color:col}},s.pct+'%')),h('div',{style:{height:7,background:'#eef4f9',borderRadius:3,overflow:'hidden'}},h('div',{style:{height:'100%',width:s.pct+'%',background:col,borderRadius:3}})));})
+            : h('div',{style:{fontSize:13,fontWeight:600,color:'#9bb4cc'}},'Answer questions to reveal your weak KPIs.'),
+          h('div',{style:{fontSize:11,fontWeight:800,textTransform:'uppercase',letterSpacing:'.5px',color:'#9bb4cc',margin:'18px 0 9px'}},'Strongest & weakest areas'),
+          h('div',{style:{display:'flex',justifyContent:'center'}}, this.radarChart(scored))
+        ))
+    );
+  }
+
+  // ---------- question overlay ----------
+  questionOverlay(){
+    const s=this.state.session; if(!s) return null;
+    const h=React.createElement;
+    const q=s.queue[s.idx];
+    const pct=Math.round((s.idx/s.queue.length)*100);
+    const letters=['A','B','C','D'];
+    return h('div',{style:{position:'fixed',inset:0,zIndex:300,background:'rgba(14,58,99,.55)',backdropFilter:'blur(4px)',display:'flex',alignItems:'center',justifyContent:'center',padding:20}},
+      h('div',{style:{background:'#fff',borderRadius:11,width:'100%',maxWidth:580,maxHeight:'90vh',overflowY:'auto',boxShadow:'0 30px 70px rgba(10,40,80,.35)',animation:'pop .25s ease'}},
+        h('div',{style:{padding:'18px 22px 0'}},
+          h('div',{style:{display:'flex',alignItems:'center',gap:12,marginBottom:14}},
+            h('button',{onClick:()=>this.setState({session:null}),style:{border:'none',background:'#f0f4f8',cursor:'pointer',width:34,height:34,borderRadius:5,fontSize:18,fontWeight:800,color:'#7c99b6'}},'✕'),
+            h('div',{style:{flex:1,height:12,background:'#eef4f9',borderRadius:4,overflow:'hidden'}},h('div',{style:{height:'100%',width:pct+'%',background:'linear-gradient(90deg,#58c47b,#3ab068)',borderRadius:4,transition:'width .3s ease'}})),
+            h('div',{style:{fontSize:13,fontWeight:800,color:'#7c99b6',minWidth:42,textAlign:'right'}},(s.idx+1)+'/'+s.queue.length),
+            this.state.powers.hint>0&&!this.state.answered?h('button',{onClick:()=>this.useHint(),style:{border:'none',cursor:'pointer',background:'#fff3d6',color:'#a9690a',fontWeight:800,fontSize:12.5,borderRadius:5,padding:'8px 11px',whiteSpace:'nowrap'}},'💡 '+this.state.powers.hint):null
+          ),
+          h('div',{style:{fontSize:10.5,fontWeight:800,textTransform:'uppercase',letterSpacing:'.5px',color:'#1c7fc4',marginBottom:8}},q.area)),
+        h('div',{style:{padding:'0 22px'}},
+          h('div',{style:{fontFamily:'Sora',fontWeight:600,fontSize:19,lineHeight:1.35,color:'#0e3a63',marginBottom:16}},q.q),
+          h('div',{style:{display:'flex',flexDirection:'column',gap:10}},q.a.map((opt,i)=>{
+            const hidden=this.state.hideOpts.includes(i);
+            const ans=this.state.answered;
+            let bg='#fff',border='#dde9f3',color='#2f4a63',badgeBg='#f0f4f8',badgeColor='#7c99b6';
+            if(ans){
+              if(i===q.c){bg='#effaf1';border='#7fcf97';color='#246b42';badgeBg='#58c47b';badgeColor='#fff';}
+              else if(i===this.state.picked){bg='#fff4f3';border='#ef9b96';color='#9e3b36';badgeBg='#ef6f6c';badgeColor='#fff';}
+              else{color='#9bb4cc';}
+            }
+            return h('button',{key:i,onClick:()=>this.pick(i),disabled:ans||hidden,style:{textAlign:'left',cursor:ans||hidden?'default':'pointer',display:'flex',alignItems:'center',gap:12,background:bg,border:'2px solid '+border,borderRadius:7,padding:'13px 15px',fontFamily:'Nunito',fontWeight:700,fontSize:14.5,color:color,opacity:hidden?0.35:1,transition:'all .12s',boxShadow:ans?'none':'0 3px 0 '+border},
+              onMouseEnter:e=>{if(!ans&&!hidden){e.currentTarget.style.borderColor='#9cd0f3';}},
+              onMouseLeave:e=>{if(!ans&&!hidden){e.currentTarget.style.borderColor=border;}}},
+              h('span',{style:{flex:'0 0 auto',width:26,height:26,borderRadius:4,background:badgeBg,color:badgeColor,fontWeight:800,fontSize:13,display:'flex',alignItems:'center',justifyContent:'center'}}, ans&&i===q.c?'✓':ans&&i===this.state.picked?'✗':letters[i]),
+              h('span',null,opt));
+          }))),
+        this.state.answered?h('div',{style:{margin:'16px 22px 0',padding:'14px 16px',background:this.state.picked===q.c?'#effaf1':'#f4f9fd',borderTop:'2px solid #eef4f9',borderRadius:'0 0 0 0'}},
+          h('div',{style:{fontSize:13,fontWeight:800,color:this.state.picked===q.c?'#246b42':'#1c6aa8',marginBottom:4}},this.state.picked===q.c?'✓ Correct! +'+(this.state.doubleArmed?24:12)+' XP':'Not quite — the answer is '+letters[q.c]),
+          h('div',{style:{fontSize:13,fontWeight:600,color:'#5d7894',lineHeight:1.5}},q.ex)):null,
+        h('div',{style:{padding:'16px 22px 20px'}},
+          this.state.answered?h('button',{onClick:()=>this.nextQ(),style:{width:'100%',border:'none',cursor:'pointer',fontFamily:'Sora',fontWeight:700,fontSize:16,color:'#fff',background:'#58c47b',padding:'14px',borderRadius:7,boxShadow:'0 5px 0 #3ab068'}}, s.idx+1>=s.queue.length?'Finish session 🎉':'Next question →'):h('div',{style:{textAlign:'center',fontSize:12.5,fontWeight:700,color:'#9bb4cc'}},'Pick an answer to continue'))
+      )
+    );
+  }
+
+  // ---------- members content nodes ----------
+  placeholder(label,h2){
+    const h=React.createElement;
+    return h('div',{style:{height:h2||150,borderRadius:6,background:'repeating-linear-gradient(135deg,#eef4fa,#eef4fa 11px,#e3edf6 11px,#e3edf6 22px)',display:'flex',alignItems:'center',justifyContent:'center',border:'1.5px dashed #c7dbec'}},
+      h('span',{style:{fontFamily:'monospace',fontSize:12,fontWeight:700,color:'#8aa6bf'}},label));
+  }
+
+  announceNode(){
+    const h=React.createElement;
+    const fund=[
+      {t:'Spring Bakesale — Main Lobby',d:'Fri Apr 17 · proceeds fund ICDC travel. Sign up to bring an item or staff a shift.',cta:'Sign up to bake / staff'},
+      {t:'Krispy Kreme Pre-Sale',d:'Orders due Mar 6. $12/dozen, pickup before the State send-off.',cta:'Reserve dozens'},
+    ];
+    return h('div',null,
+      h('div',{style:{fontFamily:'Sora',fontWeight:700,fontSize:24,color:'#0e3a63',marginBottom:3}},'Announcements'),
+      h('div',{style:{fontSize:13,fontWeight:700,color:'#7c99b6',marginBottom:18}},'Chapter news, room assignments, and fundraising'),
+      // locked pinned
+      h('div',{style:{background:'linear-gradient(160deg,#0e3a63,#1366b3)',borderRadius:9,padding:'20px 22px',color:'#fff',marginBottom:16,position:'relative',overflow:'hidden'}},
+        h('div',{style:{display:'flex',alignItems:'center',gap:8,marginBottom:12}},
+          h('span',{style:{fontSize:11,fontWeight:800,letterSpacing:'.5px',textTransform:'uppercase',background:'rgba(255,255,255,.16)',borderRadius:10,padding:'4px 11px'}},'📌 Pinned · 🔒 Members only'),
+          h('span',{style:{fontSize:12,fontWeight:700,color:'#bfe0f7'}},'Updated Mon 8:00 AM')),
+        h('div',{style:{fontFamily:'Sora',fontWeight:700,fontSize:19,marginBottom:12}},'Wednesday Club Room Assignments'),
+        h('div',{style:{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:10}},
+          [['A–I','Room 179'],['J–R','Room 180'],['S–Z','Room 181']].map(r=>h('div',{key:r[0],style:{background:'rgba(255,255,255,.1)',borderRadius:6,padding:'11px 13px'}},h('div',{style:{fontSize:12,fontWeight:700,color:'#bfe0f7'}},r[0]),h('div',{style:{fontFamily:'Sora',fontWeight:700,fontSize:17}},r[1]))))
+      ),
+      h('div',{style:{fontSize:11,fontWeight:800,textTransform:'uppercase',letterSpacing:'.5px',color:'#9bb4cc',margin:'4px 0 10px'}},'Fundraising'),
+      h('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:13}},fund.map(f=>h('div',{key:f.t,style:{background:'#fff',border:'2px solid #e3eef8',borderRadius:8,padding:18}},
+        h('div',{style:{fontSize:22,marginBottom:8}},'🧁'),
+        h('div',{style:{fontFamily:'Sora',fontWeight:700,fontSize:17,color:'#0e3a63',marginBottom:5}},f.t),
+        h('div',{style:{fontSize:13,fontWeight:600,color:'#5d7894',lineHeight:1.5,marginBottom:14}},f.d),
+        h('button',{style:{border:'none',cursor:'pointer',fontFamily:'Nunito',fontWeight:800,fontSize:13.5,color:'#fff',background:'#ffce3a',color:'#0e3a63',padding:'10px 16px',borderRadius:6,boxShadow:'0 4px 0 #d9a800'}},f.cta)
+      )))
+    );
+  }
+
+  borrowNode(){
+    const h=React.createElement;
+    const blazers=[['XS',2],['S',5],['M',8],['L',6],['XL',3],['XXL',1]];
+    return h('div',null,
+      h('div',{style:{fontFamily:'Sora',fontWeight:700,fontSize:24,color:'#0e3a63',marginBottom:3}},'Borrow'),
+      h('div',{style:{fontSize:13,fontWeight:700,color:'#7c99b6',marginBottom:18}},'Chapter blazers and trifold display stands'),
+      h('div',{style:{display:'grid',gridTemplateColumns:'1.2fr 1fr',gap:16,alignItems:'start'}},
+        h('div',{style:{background:'#fff',border:'2px solid #e3eef8',borderRadius:8,padding:20}},
+          h('div',{style:{display:'flex',alignItems:'center',gap:8,marginBottom:14}},h('span',{style:{fontSize:20}},'👔'),h('span',{style:{fontFamily:'Sora',fontWeight:700,fontSize:18,color:'#0e3a63'}},'Blazer Inventory')),
+          h('div',{style:{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:9}},blazers.map(b=>h('div',{key:b[0],style:{border:'2px solid #eef5fb',borderRadius:6,padding:'12px 10px',textAlign:'center'}},
+            h('div',{style:{fontFamily:'Sora',fontWeight:800,fontSize:20,color:'#0e3a63'}},b[0]),
+            h('div',{style:{fontSize:12,fontWeight:800,color:b[1]>0?'#3a9d5d':'#ef6f6c',marginTop:2}},b[1]>0?b[1]+' available':'Out'),
+            h('button',{disabled:b[1]<=0,style:{marginTop:9,width:'100%',border:'none',cursor:b[1]>0?'pointer':'default',fontFamily:'Nunito',fontWeight:800,fontSize:12,color:b[1]>0?'#fff':'#b7c3cf',background:b[1]>0?'#28a3ee':'#eef2f6',padding:'7px',borderRadius:5}},'Request')))),
+          h('div',{style:{fontSize:12,fontWeight:600,color:'#9bb4cc',marginTop:13,lineHeight:1.5}},'Blazers are due back within 3 days of your conference. Dry-clean before returning.')),
+        h('div',{style:{background:'#fff',border:'2px solid #e3eef8',borderRadius:8,padding:20}},
+          h('div',{style:{display:'flex',alignItems:'center',gap:8,marginBottom:14}},h('span',{style:{fontSize:20}},'🪧'),h('span',{style:{fontFamily:'Sora',fontWeight:700,fontSize:18,color:'#0e3a63'}},'Trifold Request')),
+          h('div',{style:{fontSize:13,fontWeight:600,color:'#5d7894',lineHeight:1.5,marginBottom:14}},'4 reusable trifold stands available for written-event displays. Reserve one for your prep and presentation.'),
+          h('div',{style:{display:'flex',flexDirection:'column',gap:9}},
+            h('input',{placeholder:'Your event (e.g. ENT)',style:{border:'2px solid #e3eef8',borderRadius:6,padding:'11px 13px',fontFamily:'Nunito',fontWeight:700,fontSize:14,color:'#0e3a63',outline:'none'}}),
+            h('input',{placeholder:'Date needed',style:{border:'2px solid #e3eef8',borderRadius:6,padding:'11px 13px',fontFamily:'Nunito',fontWeight:700,fontSize:14,color:'#0e3a63',outline:'none'}}),
+            h('button',{style:{border:'none',cursor:'pointer',fontFamily:'Sora',fontWeight:700,fontSize:15,color:'#fff',background:'#28a3ee',padding:'12px',borderRadius:6,boxShadow:'0 4px 0 #1366b3'}},'Request a trifold')),
+          h('div',{style:{fontSize:12,fontWeight:800,color:'#3a9d5d',marginTop:12}},'3 of 4 currently available')))
+    );
+  }
+
+  seasonNode(){
+    const h=React.createElement;
+    const timeline=[
+      {d:'Oct 15',t:'Chapter kickoff & event sign-ups',done:true},
+      {d:'Nov–Jan',t:'Weekly prep + practice role-plays',done:true},
+      {d:'Feb 12',t:'Regionals',done:true},
+      {d:'Mar 5–7',t:'SCDC',done:false,now:true},
+      {d:'Apr 25–28',t:'ICDC',done:false},
+    ];
+    const conf=(name,loc,color)=>h('div',{style:{background:'#fff',border:'2px solid #e3eef8',borderRadius:8,padding:20}},
+      h('div',{style:{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:14}},
+        h('div',null,h('div',{style:{fontFamily:'Sora',fontWeight:700,fontSize:19,color:'#0e3a63'}},name),h('div',{style:{fontSize:12.5,fontWeight:700,color:'#7c99b6'}},loc)),
+        h('span',{style:{fontSize:24}},'🏨')),
+      h('div',{style:{display:'flex',flexDirection:'column',gap:9}},
+        [['📝','Permission slip','Required · due 2 weeks prior'],['🎒','Packing list & rules','Dress code, schedule, conduct'],['🛏️','Rooming form','Pick roommates (4 per room)']].map(r=>h('div',{key:r[1],style:{display:'flex',alignItems:'center',gap:12,border:'1.5px solid #eef5fb',borderRadius:6,padding:'11px 13px'}},
+          h('span',{style:{fontSize:18}},r[0]),
+          h('div',{style:{flex:1}},h('div',{style:{fontSize:14,fontWeight:800,color:'#0e3a63'}},r[1]),h('div',{style:{fontSize:11.5,fontWeight:600,color:'#7c99b6'}},r[2])),
+          h('button',{style:{border:'none',cursor:'pointer',fontFamily:'Nunito',fontWeight:800,fontSize:12,color:'#fff',background:color,padding:'8px 13px',borderRadius:5}},'Open')))));
+    return h('div',null,
+      h('div',{style:{fontFamily:'Sora',fontWeight:700,fontSize:24,color:'#0e3a63',marginBottom:3}},'Competitive Season 26–27'),
+      h('div',{style:{fontSize:13,fontWeight:700,color:'#7c99b6',marginBottom:20}},'Timeline, conferences, and required forms'),
+      h('div',{style:{background:'#fff',border:'2px solid #e3eef8',borderRadius:8,padding:'20px 22px',marginBottom:18}},
+        h('div',{style:{fontSize:11,fontWeight:800,textTransform:'uppercase',letterSpacing:'.5px',color:'#9bb4cc',marginBottom:16}},'Season timeline'),
+        h('div',{style:{display:'flex',justifyContent:'space-between',position:'relative'}},
+          h('div',{style:{position:'absolute',top:11,left:'6%',right:'6%',height:3,background:'#e3eef8'}}),
+          timeline.map((e,i)=>h('div',{key:i,style:{position:'relative',display:'flex',flexDirection:'column',alignItems:'center',width:'20%',textAlign:'center',zIndex:1}},
+            h('div',{style:{width:24,height:24,borderRadius:'50%',background:e.done?'#58c47b':e.now?'#ffce3a':'#fff',border:'3px solid '+(e.done?'#58c47b':e.now?'#ffce3a':'#cdddec'),display:'flex',alignItems:'center',justifyContent:'center',fontSize:11,color:'#fff',fontWeight:800,marginBottom:8}},e.done?'✓':e.now?'!':''),
+            h('div',{style:{fontSize:11.5,fontWeight:800,color:e.now?'#b07d05':'#0e3a63'}},e.d),
+            h('div',{style:{fontSize:11,fontWeight:600,color:'#7c99b6',marginTop:2,lineHeight:1.3}},e.t)))
+        )),
+      h('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:16}},
+        conf('SCDC','Atlantic City, NJ · Mar 5–7','#28a3ee'),
+        conf('ICDC','Orlando, FL · Apr 25–28','#9b7bf0'))
+    );
+  }
+
+  pastNode(){
+    const h=React.createElement;
+    const gallery=[
+      ['ICDC 2025','Orlando, FL',-3,190],['SCDC 2025','Atlantic City',2,230],['Districts 2025','Paramus',-2,170],
+      ['Fall Rally 2024','Campus',3,210],['ICDC 2024','Anaheim, CA',-1,250],['Send-off 2024','Main Lobby',2,180],
+      ['States 2024','Atlantic City',-3,220],['Regionals 2025','Hackensack',1,195],
+    ];
+    return h('div',null,
+      h('div',{style:{fontFamily:'Sora',fontWeight:700,fontSize:24,color:'#0e3a63',marginBottom:3}},'Past Conferences'),
+      h('div',{style:{fontSize:13,fontWeight:700,color:'#7c99b6',marginBottom:24}},'Memories from the road'),
+      h('div',{style:{display:'flex',flexWrap:'wrap',gap:'34px 22px',padding:'20px 10px 40px',justifyContent:'center'}},gallery.map((g,i)=>h('div',{key:g[0],style:{width:g[3],transform:'rotate('+g[2]+'deg)',position:'relative',cursor:'pointer',transition:'transform .2s ease'},
+        onMouseEnter:e=>{e.currentTarget.style.transform='rotate(0deg) scale(1.06)';e.currentTarget.style.zIndex=5;const cap=e.currentTarget.querySelector('[data-cap]'); if(cap) cap.style.opacity=1;},
+        onMouseLeave:e=>{e.currentTarget.style.transform='rotate('+g[2]+'deg) scale(1)';e.currentTarget.style.zIndex=1;const cap=e.currentTarget.querySelector('[data-cap]'); if(cap) cap.style.opacity=0;}},
+        h('div',{style:{background:'#fff',padding:'10px 10px 34px',boxShadow:'0 10px 22px rgba(20,60,110,.18)',border:'1px solid #eef3f8',position:'relative'}},
+          this.placeholder('conference photo',g[3]*0.82),
+          h('div',{'data-cap':true,style:{position:'absolute',top:10,left:10,right:10,bottom:34,opacity:0,transition:'opacity .18s ease',background:'rgba(14,58,99,.62)',display:'flex',alignItems:'center',justifyContent:'center',flexDirection:'column',gap:4,textAlign:'center',padding:12}},
+            h('div',{style:{fontFamily:'Sora',fontWeight:700,fontSize:14.5,color:'#fff'}},g[0]),
+            h('div',{style:{fontSize:11.5,fontWeight:700,color:'#dcecfa'}},g[1]))
+        ))))
+    );
+  }
+
+  renderVals(){
+    const st=this.state;
+    const xpPct=Math.min(100,Math.round((st.xpInLevel/st.xpNext)*100));
+    const isHome=st.tab==='home', isMembers=st.tab==='members', isPrepTab=st.tab==='prep', isPastTab=st.tab==='past';
+    const onBg='#e9f6ff', onColor='#0e3a63', offBg='transparent', offColor='#5d7894';
+    const sub=st.sub;
+    const navItem=(k)=>({bg:sub===k?onBg:offBg,color:sub===k?onColor:offColor});
+    const an=navItem('announce'),re=navItem('resources'),se=navItem('season');
+    return {
+      schoolName:this.props.schoolName ?? 'Bergen County Academies',
+      isHome, isMembers, isPrepTab, isPastTab,
+      homeColor:isHome?'#0e3a63':'#5d7894',
+      membersColor:isMembers?'#0e3a63':'#5d7894',
+      prepTopColor:isPrepTab?'#0e3a63':'#5d7894',
+      pastTopColor:isPastTab?'#0e3a63':'#5d7894',
+      showStats: !isHome,
+      streak:st.streak, level:st.level, totalXp:st.totalXp, dd:st.dd, xpPct,
+      navHome:()=>this.setState({tab:'home'}),
+      navMembers:()=>this.setState({tab:'members',sub:'announce'}),
+      navPrepTop:()=>this.setState({tab:'prep',prepView:'arena'}),
+      navPastTop:()=>this.setState({tab:'past'}),
+      goPrep:()=>this.setState({tab:'prep',prepView:'arena'}),
+      navAnnounce:()=>this.scrollToSection('sec-announce','announce'),
+      navResources:()=>this.scrollToSection('sec-resources','resources'),
+      navSeason:()=>this.scrollToSection('sec-season','season'),
+      isAnnounce:sub==='announce',isResources:sub==='resources',isSeason:sub==='season',
+      announceBg:an.bg,announceColor:an.color,resourcesBg:re.bg,resourcesColor:re.color,
+      seasonBg:se.bg,seasonColor:se.color,
+      announceNode:this.announceNode(),
+      borrowNode:this.borrowNode(),
+      seasonNode:this.seasonNode(),
+      pastNode:this.pastNode(),
+      prepNode:this.arena(),
+      questionOverlay:this.questionOverlay(),
+      kpiPickerModal:this.kpiPickerModal(),
+      toastNode:st.toast,
+      membersScrollRef:()=>{},
+    };
+  }
+}
+</script>
+</body>
+</html>
