@@ -8,6 +8,10 @@ import { allowedDomain } from '@/lib/auth/domain';
 
 const initialState: ActionState = {};
 
+// School accounts are Microsoft 365, so send members straight to Outlook on the web rather
+// than making them go find the tab themselves.
+const SCHOOL_MAIL_URL = 'https://outlook.office.com/mail/';
+
 function SubmitButton() {
   const { pending } = useFormStatus();
   return (
@@ -24,7 +28,17 @@ export default function SignupPage() {
     return (
       <div style={{ textAlign: 'center', color: colors.navy }}>
         <p style={{ fontWeight: 700, marginBottom: 8 }}>Almost there!</p>
-        <p style={{ color: colors.textSecondary, fontSize: 14.5 }}>{state.message}</p>
+        <p style={{ color: colors.textSecondary, fontSize: 14.5, lineHeight: 1.55 }}>
+          Check your{' '}
+          <a href={SCHOOL_MAIL_URL} target="_blank" rel="noopener noreferrer" style={{ color: colors.blue, fontWeight: 800 }}>
+            email
+          </a>{' '}
+          for a verification link to finish signing up.
+        </p>
+        <p style={{ color: colors.textMuted, fontSize: 13, lineHeight: 1.5, marginTop: 10 }}>
+          It can take a minute to arrive. If it&rsquo;s not there, check your <strong>junk</strong> or{' '}
+          <strong>spam</strong> folder.
+        </p>
         <Link href="/login" style={{ display: 'inline-block', marginTop: 18, fontSize: 13.5 }}>
           Back to login
         </Link>

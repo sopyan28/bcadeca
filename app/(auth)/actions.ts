@@ -33,7 +33,21 @@ export async function signUp(_prev: ActionState, formData: FormData): Promise<Ac
     },
   });
 
-  if (error) return { error: error.message };
+  if (error) {
+    // handle_new_user() raises for a bad invite code, but Supabase usually surfaces that as a
+    // generic "Database error saving new user" -- which tells a member nothing. Map it back to
+    // the actual cause, and never render an empty string (that shows as a bare red box).
+    const raw = error.message?.trim() ?? '';
+    const badCode = /invite code/i.test(raw) || (/database error saving new user/i.test(raw) && inviteCode.length > 0);
+    if (badCode) {
+      return {
+        error:
+          'That DECA Board invite code is invalid, expired, or has already been used up. ' +
+          'Leave the field blank to sign up as a regular member.',
+      };
+    }
+    return { error: raw || 'Could not create your account. Please try again.' };
+  }
 
   return { message: 'Check your school email for a verification link to finish signing up.' };
 }
