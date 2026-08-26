@@ -33,13 +33,14 @@ export default async function HomePage() {
       <Header stats={stats} />
 
       <main style={{ flex: 1 }}>
-        <div style={{ width: '100%', height: 'clamp(220px, 24vw, 420px)', overflow: 'hidden' }}>
+        <div style={{ width: '100%', height: 'clamp(240px, 28vw, 500px)', overflow: 'hidden' }}>
           {/* banner.jpg is square (4096x4096): a fixed-height strip shows a smaller slice of it
               as the viewport widens, which crops the front row's faces off. Scaling height with
-              vw keeps the visible band at roughly 36-61% of the photo -- the group's faces -- at
+              vw keeps the visible band at roughly 37-65% of the photo -- the full group, from the
+              back row's hair down past the front row's faces -- at
               every width. Adjust objectPosition, not height, to re-aim the crop. */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/photos/banner.jpg" alt="BCA DECA members" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 48%', display: 'block' }} />
+          <img src="/photos/banner.jpg" alt="BCA DECA members" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 52%', display: 'block' }} />
         </div>
         <section
           style={{
