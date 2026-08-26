@@ -65,7 +65,7 @@ export function Header({ stats }: { stats?: HeaderStats | null }) {
         </Link>
 
         <nav style={{ display: 'flex', gap: 4, marginLeft: 8 }}>
-          {(stats?.isOfficer ? [...NAV_LINKS, { href: '/officer', label: 'Officer' }] : NAV_LINKS).map((link) => {
+          {(stats?.isOfficer ? [...NAV_LINKS, { href: '/officer', label: 'Board' }] : NAV_LINKS).map((link) => {
             const isActive = link.href === '/' ? pathname === '/' : pathname.startsWith(link.href);
             return (
               <Link

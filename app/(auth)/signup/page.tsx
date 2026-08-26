@@ -47,7 +47,7 @@ export default function SignupPage() {
         <input name="password" type="password" required minLength={8} autoComplete="new-password" style={{ ...fieldStyle, marginTop: 6 }} />
       </label>
       <label style={{ fontSize: 13, fontWeight: 700, color: colors.textSecondary }}>
-        Officer invite code (optional)
+        DECA Board invite code (optional)
         <input name="inviteCode" type="text" style={{ ...fieldStyle, marginTop: 6 }} />
       </label>
 

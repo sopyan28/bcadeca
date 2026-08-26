@@ -10,7 +10,7 @@ async function requireOfficer() {
   } = await supabase.auth.getUser();
   if (!user) throw new Error('Not authenticated');
   const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
-  if (profile?.role !== 'officer') throw new Error('Officers only');
+  if (profile?.role !== 'officer') throw new Error('DECA Board members only');
   return { supabase, userId: user.id };
 }
 

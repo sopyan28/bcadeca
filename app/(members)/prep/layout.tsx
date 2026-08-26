@@ -7,7 +7,6 @@ import { fonts } from '@/lib/ui/tokens';
 const TABS = [
   { href: '/prep/arena', label: 'Arena', icon: '🧊' },
   { href: '/prep/diagnostic', label: 'Diagnostic', icon: '📊' },
-  { href: '/prep/events', label: 'Event Resources', icon: '📁' },
   { href: '/prep/profile', label: 'My Profile', icon: '👤' },
 ];
 

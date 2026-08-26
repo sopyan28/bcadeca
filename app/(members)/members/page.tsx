@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { colors, fonts, fieldStyle, pressedButton } from '@/lib/ui/tokens';
 import { requestTrifold } from './actions';
+import { MembersSideNav } from '@/components/members/MembersSideNav';
 
 const BLAZER_SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
 
@@ -68,6 +69,7 @@ export default async function MembersPage() {
   return (
     <div style={{ display: 'grid', gridTemplateColumns: '218px minmax(0,1fr)', gap: 20, alignItems: 'start' }}>
       <aside style={{ position: 'sticky', top: 78, display: 'flex', flexDirection: 'column', gap: 14 }}>
+        <MembersSideNav />
         <div style={{ borderRadius: 9, overflow: 'hidden', border: `2px solid ${colors.border}`, boxShadow: '0 8px 20px rgba(20,80,150,.12)' }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/next-big-thing.png" alt="DECA Next Big Thing" style={{ width: '100%', height: 290, objectFit: 'cover', objectPosition: 'center top', display: 'block' }} />
@@ -79,7 +81,7 @@ export default async function MembersPage() {
         </a>
       </aside>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 20, minWidth: 0 }}>
-      <div style={{ background: '#fff', border: `2px solid ${colors.border}`, borderRadius: 10, padding: 22 }}>
+      <div id="sec-announce" style={{ scrollMarginTop: 88, background: '#fff', border: `2px solid ${colors.border}`, borderRadius: 10, padding: 22 }}>
         <div style={{ fontFamily: fonts.heading, fontWeight: 700, fontSize: 17, color: colors.navy, marginBottom: 14 }}>
           📣 Announcements
         </div>
@@ -99,7 +101,7 @@ export default async function MembersPage() {
         </div>
       </div>
 
-      <div style={{ background: '#fff', border: `2px solid ${colors.border}`, borderRadius: 10, padding: 22 }}>
+      <div id="sec-resources" style={{ scrollMarginTop: 88, background: '#fff', border: `2px solid ${colors.border}`, borderRadius: 10, padding: 22 }}>
         <div style={{ fontFamily: fonts.heading, fontWeight: 700, fontSize: 17, color: colors.navy, marginBottom: 3 }}>
           📚 Resources
         </div>
@@ -123,7 +125,7 @@ export default async function MembersPage() {
               })}
             </div>
             <div style={{ fontSize: 12, color: colors.textMuted, marginTop: 12, lineHeight: 1.5 }}>
-              Ask an officer to check one out. Blazers are due back within 3 days of your conference.
+              Ask a board member to check one out. Blazers are due back within 3 days of your conference.
             </div>
           </div>
 
@@ -153,7 +155,7 @@ export default async function MembersPage() {
         </div>
       </div>
 
-      <div style={{ background: '#fff', border: `2px solid ${colors.border}`, borderRadius: 10, padding: 22 }}>
+      <div id="sec-season" style={{ scrollMarginTop: 88, background: '#fff', border: `2px solid ${colors.border}`, borderRadius: 10, padding: 22 }}>
         <div style={{ fontFamily: fonts.heading, fontWeight: 700, fontSize: 17, color: colors.navy, marginBottom: 3 }}>
           📅 Competitive Season 26–27
         </div>

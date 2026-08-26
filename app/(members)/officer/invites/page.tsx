@@ -22,7 +22,7 @@ export default async function OfficerInvitesPage() {
   return (
     <div style={{ display: 'grid', gridTemplateColumns: '340px 1fr', gap: 20, alignItems: 'start' }}>
       <form action={create} style={{ background: '#fff', border: `2px solid ${colors.border}`, borderRadius: 10, padding: 20, display: 'flex', flexDirection: 'column', gap: 12 }}>
-        <div style={{ fontFamily: fonts.heading, fontWeight: 700, fontSize: 15, color: colors.navy }}>New officer invite code</div>
+        <div style={{ fontFamily: fonts.heading, fontWeight: 700, fontSize: 15, color: colors.navy }}>New DECA Board invite code</div>
         <label style={{ fontSize: 13, fontWeight: 700, color: colors.textSecondary }}>
           Code
           <input name="code" required placeholder="BCA-DECA-2027" style={{ ...fieldStyle, marginTop: 6 }} />

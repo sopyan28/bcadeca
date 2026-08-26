@@ -18,3 +18,29 @@ input, select, textarea { font: inherit; }
 @keyframes pfloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
 @keyframes toastIn { from { opacity: 0; transform: translateY(14px) scale(.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
 @keyframes pop { 0% { transform: scale(.8); opacity: 0; } 60% { transform: scale(1.04); } 100% { transform: scale(1); opacity: 1; } }
+
+/* Past Conferences scrapbook: photos sit tilted in a Polaroid frame with the caption
+   hidden over the image, revealed on hover as the photo straightens and lifts.
+   The tilt lives in --tilt so :hover can replace the whole transform without !important. */
+.polaroid {
+  position: relative;
+  cursor: pointer;
+  transform: rotate(var(--tilt, 0deg));
+  transition: transform 0.2s ease;
+}
+.polaroid:hover,
+.polaroid:focus-within {
+  transform: rotate(0deg) scale(1.06);
+  z-index: 5;
+}
+.polaroid-cap {
+  opacity: 0;
+  transition: opacity 0.18s ease;
+}
+.polaroid:hover .polaroid-cap,
+.polaroid:focus-within .polaroid-cap {
+  opacity: 1;
+}
+@media (prefers-reduced-motion: reduce) {
+  .polaroid, .polaroid-cap { transition: none; }
+}

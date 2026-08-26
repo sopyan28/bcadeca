@@ -6,10 +6,7 @@ import { colors, fonts, pressedButton } from '@/lib/ui/tokens';
 export default async function HomePage() {
   const supabase = await createClient();
 
-  const [{ data: memberCount }, { data: userRes }] = await Promise.all([
-    supabase.rpc('member_count'),
-    supabase.auth.getUser(),
-  ]);
+  const { data: userRes } = await supabase.auth.getUser();
 
   let stats = null;
   if (userRes.user) {
@@ -36,9 +33,13 @@ export default async function HomePage() {
       <Header stats={stats} />
 
       <main style={{ flex: 1 }}>
-        <div style={{ width: '100%', height: 260, overflow: 'hidden' }}>
+        <div style={{ width: '100%', height: 'clamp(220px, 24vw, 420px)', overflow: 'hidden' }}>
+          {/* banner.jpg is square (4096x4096): a fixed-height strip shows a smaller slice of it
+              as the viewport widens, which crops the front row's faces off. Scaling height with
+              vw keeps the visible band at roughly 36-61% of the photo -- the group's faces -- at
+              every width. Adjust objectPosition, not height, to re-aim the crop. */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/photos/banner.jpg" alt="BCA DECA members" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 28%', display: 'block' }} />
+          <img src="/photos/banner.jpg" alt="BCA DECA members" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 48%', display: 'block' }} />
         </div>
         <section
           style={{
@@ -197,7 +198,7 @@ export default async function HomePage() {
             <div style={{ display: 'flex', gap: 26, marginTop: 22 }}>
               <div>
                 <div style={{ fontFamily: fonts.heading, fontWeight: 800, fontSize: 26, color: colors.blue }}>
-                  {memberCount ?? 0}+
+                  110+
                 </div>
                 <div style={{ fontSize: 12, fontWeight: 700, color: colors.textMuted }}>Active members</div>
               </div>

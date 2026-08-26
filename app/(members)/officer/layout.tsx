@@ -25,7 +25,7 @@ export default async function OfficerLayout({ children }: { children: React.Reac
   return (
     <div>
       <div style={{ fontFamily: fonts.heading, fontWeight: 700, fontSize: 19, color: colors.navy, marginBottom: 14 }}>
-        Officer tools
+        DECA Board tools
       </div>
       <nav style={{ display: 'flex', gap: 6, marginBottom: 20, borderBottom: `2px solid ${colors.border}`, paddingBottom: 2 }}>
         {TABS.map((tab) => (
