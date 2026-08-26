@@ -71,7 +71,9 @@ export function DiagnosticRunner({ runId }: { runId: string }) {
       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12.5, fontWeight: 700, color: colors.textMuted, marginBottom: 10 }}>
         <span>{question.kpi_area}</span>
         <span>
-          Item {(item.totalItemsThisRun ?? 0) + 1} &nbsp;·&nbsp; {item.areasCovered}/{item.totalAreas} areas covered
+          Item {(item.totalItemsThisRun ?? 0) + 1}
+          {item.plannedItemCount ? ` of ${item.plannedItemCount}` : ''} &nbsp;·&nbsp; {item.areasCovered}/{item.totalAreas} areas
+          covered
         </span>
       </div>
       <div style={{ fontFamily: fonts.body, fontWeight: 700, fontSize: 16, color: colors.navy, marginBottom: 16 }}>

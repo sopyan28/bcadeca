@@ -66,7 +66,19 @@ export default async function MembersPage() {
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+    <div style={{ display: 'grid', gridTemplateColumns: '218px minmax(0,1fr)', gap: 20, alignItems: 'start' }}>
+      <aside style={{ position: 'sticky', top: 78, display: 'flex', flexDirection: 'column', gap: 14 }}>
+        <div style={{ borderRadius: 9, overflow: 'hidden', border: `2px solid ${colors.border}`, boxShadow: '0 8px 20px rgba(20,80,150,.12)' }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/next-big-thing.png" alt="DECA Next Big Thing" style={{ width: '100%', height: 290, objectFit: 'cover', objectPosition: 'center top', display: 'block' }} />
+        </div>
+        <a href="mailto:decaboard26-27@bergen.org" style={{ background: '#fff', border: `2px solid ${colors.border}`, borderRadius: 9, padding: 14, display: 'flex', flexDirection: 'column', gap: 6, textDecoration: 'none', boxShadow: '0 4px 0 #eef4f9' }}>
+          <span style={{ fontWeight: 800, fontSize: 10.5, letterSpacing: '.6px', textTransform: 'uppercase', color: colors.textFaint }}>Questions?</span>
+          <span style={{ fontFamily: fonts.heading, fontWeight: 700, fontSize: 14, color: colors.navy }}>Contact the DECA Board</span>
+          <span style={{ fontSize: 11.5, fontWeight: 700, color: '#1c7fc4', wordBreak: 'break-all' }}>decaboard26-27@bergen.org</span>
+        </a>
+      </aside>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 20, minWidth: 0 }}>
       <div style={{ background: '#fff', border: `2px solid ${colors.border}`, borderRadius: 10, padding: 22 }}>
         <div style={{ fontFamily: fonts.heading, fontWeight: 700, fontSize: 17, color: colors.navy, marginBottom: 14 }}>
           📣 Announcements
@@ -221,6 +233,7 @@ export default async function MembersPage() {
             </div>
           ))}
         </div>
+      </div>
       </div>
     </div>
   );

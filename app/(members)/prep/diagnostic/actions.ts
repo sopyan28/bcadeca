@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
 import {
   checkStop,
+  plannedItemCount,
   selectNextDiagnosticItem,
   INITIAL_ABILITY,
   INITIAL_RD,
@@ -68,6 +69,8 @@ export interface NextItemResult {
   totalItemsThisRun?: number;
   areasCovered?: number;
   totalAreas?: number;
+  /** Fixed-form run length (areas x ITEMS_PER_AREA), so the runner can show "Item 7 of 50". */
+  plannedItemCount?: number;
 }
 
 export async function getNextDiagnosticItem(runId: string): Promise<NextItemResult> {
@@ -106,6 +109,7 @@ export async function getNextDiagnosticItem(runId: string): Promise<NextItemResu
     totalItemsThisRun,
     areasCovered: areas.filter((a) => a.itemsThisRun > 0).length,
     totalAreas: areas.length,
+    plannedItemCount: plannedItemCount(questionsByArea),
   };
 }
 
@@ -175,6 +179,7 @@ export interface DiagnosticResultRow {
   mastery_pct: number;
   confidence_pct: number;
   items_in_area: number;
+  items_correct: number;
   low_data: boolean;
 }
 
@@ -182,8 +187,11 @@ export async function getDiagnosticResults(runId: string): Promise<DiagnosticRes
   const supabase = await createClient();
   const { data } = await supabase
     .from('diagnostic_results')
-    .select('kpi_area, mastery_pct, confidence_pct, items_in_area, low_data')
+    .select('kpi_area, mastery_pct, confidence_pct, items_in_area, items_correct, low_data')
     .eq('run_id', runId)
     .order('kpi_area');
   return data ?? [];
 }
+
+// areaTier() lives in lib/algorithms/diagnosticElo.ts -- a 'use server' module may only
+// export async functions, and it is scoring logic rather than a server action.

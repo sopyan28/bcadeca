@@ -7,10 +7,34 @@ export interface RadarDatum {
   low_data: boolean;
 }
 
-const SIZE = 340;
+// Sized so the longest abbreviated label ("Marketing-Info Mgmt", ~105px at 9.5px bold)
+// still clears the edge when anchored at MAX_R + 12. The svg scales down responsively.
+const SIZE = 520;
 const CENTER = SIZE / 2;
 const MAX_R = 118;
 const RINGS = [25, 50, 75, 100];
+
+/**
+ * The bank spans 25 instructional areas, several with names too long to sit flat around a
+ * 25-spoke radar without colliding. Labels are abbreviated and rotated to run along their
+ * own spoke; the exact per-area scores live in the list underneath the chart.
+ */
+const LABEL_ABBREVIATIONS: [RegExp, string][] = [
+  [/\bInformation\b/g, 'Info'],
+  [/\bManagement\b/g, 'Mgmt'],
+  [/\bProfessional\b/g, 'Prof.'],
+  [/\bDevelopment\b/g, 'Dev.'],
+  [/\bIntelligence\b/g, 'Intel.'],
+  [/\bCommunication\b/g, 'Comms'],
+  [/\bHuman Resources\b/g, 'HR'],
+  [/\bProduct\/Service\b/g, 'Product / Svc'],
+  [/\bEntrepreneurship\b/g, 'Entrep.'],
+  [/\bRelations\b/g, 'Rel.'],
+];
+
+function shortLabel(area: string): string {
+  return LABEL_ABBREVIATIONS.reduce((s, [re, to]) => s.replace(re, to), area);
+}
 
 function pointFor(index: number, total: number, valuePct: number) {
   const angle = -Math.PI / 2 + (2 * Math.PI * index) / total;
@@ -20,8 +44,16 @@ function pointFor(index: number, total: number, valuePct: number) {
 
 function labelPointFor(index: number, total: number) {
   const angle = -Math.PI / 2 + (2 * Math.PI * index) / total;
-  const r = MAX_R + 26;
-  return { x: CENTER + r * Math.cos(angle), y: CENTER + r * Math.sin(angle) };
+  const r = MAX_R + 12;
+  const deg = (angle * 180) / Math.PI;
+  // Flip labels on the left half so they read left-to-right instead of upside down.
+  const flipped = Math.cos(angle) < 0;
+  return {
+    x: CENTER + r * Math.cos(angle),
+    y: CENTER + r * Math.sin(angle),
+    rotation: flipped ? deg + 180 : deg,
+    anchor: flipped ? ('end' as const) : ('start' as const),
+  };
 }
 
 function polygonPoints(data: RadarDatum[], key: 'mastery_pct' | 'confidence_pct') {
@@ -40,7 +72,7 @@ export function RadarChart({ data }: { data: RadarDatum[] }) {
   const n = data.length;
 
   return (
-    <svg width={SIZE} height={SIZE} viewBox={`0 0 ${SIZE} ${SIZE}`}>
+    <svg width={SIZE} height={SIZE} viewBox={`0 0 ${SIZE} ${SIZE}`} style={{ maxWidth: '100%', height: 'auto' }}>
       {RINGS.map((ring) => (
         <polygon
           key={ring}
@@ -74,14 +106,15 @@ export function RadarChart({ data }: { data: RadarDatum[] }) {
             key={d.kpi_area}
             x={p.x}
             y={p.y}
-            textAnchor="middle"
+            transform={`rotate(${p.rotation} ${p.x} ${p.y})`}
+            textAnchor={p.anchor}
             dominantBaseline="middle"
             fontFamily={fonts.body}
-            fontSize={10.5}
+            fontSize={9.5}
             fontWeight={800}
             fill={d.low_data ? colors.goldText : colors.textSecondary}
           >
-            {d.kpi_area}
+            {shortLabel(d.kpi_area)}
           </text>
         );
       })}

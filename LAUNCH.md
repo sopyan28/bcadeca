@@ -21,8 +21,8 @@ will come up empty.
 2. Open `supabase/SETUP_ALL.sql` in this folder, copy the **whole file**.
 3. Paste into the SQL Editor and click **Run**.
 
-That single file contains all 8 migrations plus the seed data (question bank, shop
-catalog, blazer inventory, starter announcements), in the correct order.
+That single file contains the schema migrations plus the seed data (starter question
+bank, shop catalog, blazer inventory, announcements), in the correct order.
 
 **Verify it worked** — run this afterward in the same editor:
 
@@ -34,6 +34,31 @@ select
 ```
 
 Expect roughly: 18 questions, 16 shop items, 3 announcements.
+
+## Step 1b — Load the district-exam question bank (2 minutes)
+
+`SETUP_ALL.sql` only carries the 18 prototype questions. The real bank — 400 items
+parsed from the four 2026 district sample exams — ships as its own file because it is
+~390 KB, too big to comfortably paste alongside everything else.
+
+Run these two, in order, as separate queries in the same SQL Editor:
+
+1. `supabase/migrations/0010_question_bank_import.sql` — the 400 questions.
+2. `supabase/migrations/0011_diagnostic_fixed_form.sql` — makes the diagnostic a
+   fixed-form test (2 questions per instructional area) and adds the per-area
+   correct-count the results page reports weak areas from.
+
+Both are re-runnable: 0010 skips any question already in the bank, and 0011 is
+idempotent.
+
+**Verify** — expect 418 questions across 25 instructional areas and 4 clusters:
+
+```sql
+select count(*) as questions,
+       count(distinct kpi_area) as areas,
+       count(distinct cluster)  as clusters
+from public.questions where active;
+```
 
 ## Step 2 — Email delivery (the real launch blocker)
 

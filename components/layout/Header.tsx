@@ -17,6 +17,7 @@ export interface HeaderStats {
 
 const NAV_LINKS = [
   { href: '/', label: 'Home' },
+  { href: '/find-your-event', label: 'Find Your Event' },
   { href: '/members', label: 'Members' },
   { href: '/prep', label: 'Prep' },
   { href: '/past-conferences', label: 'Past Conferences' },

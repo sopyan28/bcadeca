@@ -36,6 +36,10 @@ export default async function HomePage() {
       <Header stats={stats} />
 
       <main style={{ flex: 1 }}>
+        <div style={{ width: '100%', height: 260, overflow: 'hidden' }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/photos/banner.jpg" alt="BCA DECA members" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 28%', display: 'block' }} />
+        </div>
         <section
           style={{
             background: 'linear-gradient(165deg,#bfe6ff 0%,#e7f5ff 60%,#eaf6ff 100%)',
@@ -158,7 +162,21 @@ export default async function HomePage() {
           </div>
         </section>
 
-        <section style={{ maxWidth: 1100, margin: '0 auto', padding: '10px 22px 64px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+        <section style={{ maxWidth: 1100, margin: '0 auto', padding: '10px 22px 0' }}>
+          <div style={{ background: 'linear-gradient(150deg,#0e3a63,#1c7fc4 60%,#28a3ee)', borderRadius: 12, padding: '32px 34px', color: '#fff', display: 'grid', gridTemplateColumns: 'minmax(0,1.3fr) minmax(230px,.7fr)', gap: 26, alignItems: 'center', boxShadow: '0 14px 34px rgba(20,80,150,.2)' }}>
+            <div>
+              <div style={{ display: 'inline-block', background: 'rgba(255,255,255,.16)', borderRadius: 20, padding: '5px 13px', fontWeight: 800, fontSize: 11.5, letterSpacing: '.5px', textTransform: 'uppercase', marginBottom: 13 }}>New · 20-question matcher</div>
+              <h2 style={{ fontFamily: fonts.heading, fontWeight: 700, fontSize: 30, lineHeight: 1.12, letterSpacing: '-.6px', marginBottom: 11 }}>Not sure which event to compete in?</h2>
+              <p style={{ fontSize: 15, lineHeight: 1.55, color: '#d3e9fa', maxWidth: 520 }}>Answer quick questions about your interests, team preference, competition style, speaking, writing, exams, and workload. You’ll get ranked event matches with official DECA guidelines.</p>
+              <Link href="/find-your-event" style={{ marginTop: 20, ...pressedButton(colors.gold, colors.goldShadow), color: colors.navy, fontFamily: fonts.heading, fontSize: 15, padding: '13px 22px', display: 'inline-block' }}>Find your event →</Link>
+            </div>
+            <div style={{ display: 'grid', gap: 10 }}>
+              {[['20', 'questions on fit and style'], ['60+', 'official event options'], ['4', 'ranked matches for you']].map(([value, label], index) => <div key={label} style={{ display: 'flex', alignItems: 'baseline', gap: 10, paddingBottom: index < 2 ? 9 : 0, borderBottom: index < 2 ? '1px solid rgba(255,255,255,.16)' : 'none' }}><span style={{ fontFamily: fonts.heading, fontWeight: 700, fontSize: 26 }}>{value}</span><span style={{ fontSize: 12.5, fontWeight: 700, color: '#bfe0f7' }}>{label}</span></div>)}
+            </div>
+          </div>
+        </section>
+
+        <section style={{ maxWidth: 1100, margin: '0 auto', padding: '44px 22px 64px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
           <div style={{ background: '#fff', border: `2px solid ${colors.border}`, borderRadius: 10, padding: 30 }}>
             <div style={{ fontWeight: 800, fontSize: 12, letterSpacing: 0.6, textTransform: 'uppercase', color: '#1c7fc4', marginBottom: 10 }}>
               ABOUT US
@@ -184,8 +202,8 @@ export default async function HomePage() {
                 <div style={{ fontSize: 12, fontWeight: 700, color: colors.textMuted }}>Active members</div>
               </div>
               <div>
-                <div style={{ fontFamily: fonts.heading, fontWeight: 800, fontSize: 26, color: colors.blue }}>34</div>
-                <div style={{ fontSize: 12, fontWeight: 700, color: colors.textMuted }}>ICDC qualifiers &apos;25</div>
+                <div style={{ fontFamily: fonts.heading, fontWeight: 800, fontSize: 26, color: colors.blue }}>35</div>
+                <div style={{ fontSize: 12, fontWeight: 700, color: colors.textMuted }}>ICDC qualifiers &apos;26</div>
               </div>
               <div>
                 <div style={{ fontFamily: fonts.heading, fontWeight: 800, fontSize: 26, color: colors.blue }}>12</div>
@@ -194,22 +212,14 @@ export default async function HomePage() {
             </div>
           </div>
 
-          <div style={{ background: 'linear-gradient(160deg,#0e3a63,#1366b3)', borderRadius: 10, padding: 30, color: '#fff', position: 'relative', overflow: 'hidden' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', minHeight: 390 }}>
+          <div style={{ background: 'linear-gradient(160deg,#0e3a63,#1366b3)', borderRadius: 10, padding: 30, color: '#fff', position: 'relative', overflow: 'hidden', flex: 1 }}>
             <div style={{ fontWeight: 800, fontSize: 12, letterSpacing: 0.6, textTransform: 'uppercase', color: '#9fd2f5', marginBottom: 10 }}>
               Sponsor us
             </div>
             <h2 style={{ fontFamily: fonts.heading, fontWeight: 700, fontSize: 25, marginBottom: 11 }}>Partner with BCA DECA</h2>
             <p style={{ fontSize: 14.5, lineHeight: 1.6, color: '#cfe6f7' }}>
-              Local businesses help send our members to States and ICDC. All sponsors get logo placement on chapter
-              materials, conference shout-outs, and a thank-you in our season recap.
-              <br />
-              <br />
-              We&apos;re also offering access to our ABF talent, and sponsors may request promotional material
-              designed by our marketing experts, a financial analysis of the business, and any other type of help
-              that may be needed.
-              <br />
-              <br />
-              Please reach out to discuss details of becoming a sponsor.
+              Support from local businesses can help us fund the costs of sending members to States and ICDC. All sponsors get logo placement on chapter materials, social media shout-outs, and a thank-you on the website. Please reach out to discuss becoming a sponsor.
             </p>
             <div style={{ marginTop: 20, display: 'flex', flexDirection: 'column', gap: 9 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 14, fontWeight: 700 }}>
@@ -222,11 +232,14 @@ export default async function HomePage() {
                 <span style={{ fontSize: 16 }}>📍</span> 200 Hackensack Ave, Hackensack NJ
               </div>
             </div>
-            <button
-              style={{ marginTop: 22, ...pressedButton(colors.gold, colors.goldShadow), color: colors.navy, fontFamily: fonts.heading, fontSize: 15, padding: '12px 20px' }}
-            >
+            <a href="mailto:josgut@bergen.org?subject=BCA%20DECA%20Sponsorship" style={{ marginTop: 22, ...pressedButton(colors.gold, colors.goldShadow), color: colors.navy, fontFamily: fonts.heading, fontSize: 15, padding: '12px 20px', display: 'inline-block' }}>
               Become a sponsor
-            </button>
+            </a>
+          </div>
+          <div style={{ marginTop: 'auto', display: 'flex', justifyContent: 'flex-end', paddingTop: 20 }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/deca-logo.png" alt="DECA" style={{ width: 210, height: 'auto', display: 'block' }} />
+          </div>
           </div>
         </section>
       </main>

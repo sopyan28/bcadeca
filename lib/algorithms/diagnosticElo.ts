@@ -1,4 +1,4 @@
-import { weightedSampleWithoutReplacement } from './questionPool';
+import { shuffle, weightedSampleWithoutReplacement } from './questionPool';
 import type { QuestionRow } from './types';
 
 /**
@@ -15,12 +15,24 @@ export const INITIAL_RD = 350;
 export const RD_FLOOR_MIN = 30;
 const RD_DECAY_PER_ITEM = 0.75;
 
-export const HARD_CAP_ITEMS = 40;
-export const SOFT_CAP_ITEMS = 30;
-const MIN_ITEMS_OVERALL_FOR_CONVERGENCE = 20;
-const MIN_ITEMS_PER_AREA_FLOOR = 2;
-const CONVERGENCE_RD_THRESHOLD = 80;
+/**
+ * The diagnostic is a fixed-form test: every KPI area contributes exactly this many items,
+ * so a run is `areas x ITEMS_PER_AREA` questions long and each area finishes with a directly
+ * comparable score. Areas the member misses items in are what the results page reports back
+ * as weak areas, so the count is deliberately the same for every area -- an adaptive length
+ * would make "2 wrong" mean different things in different areas.
+ */
+export const ITEMS_PER_AREA = 2;
+
+/** Absolute safety bound so a malformed bank can't produce an unbounded run. */
+export const HARD_CAP_ITEMS = 200;
+
 const CANDIDATE_WINDOW = 5; // nearest-difficulty candidates to weight-sample from, avoids deterministic reuse of "the" closest item
+
+/** An area with a thin pool contributes everything it has rather than blocking the run. */
+export function targetItemsForArea(poolSize: number): number {
+  return Math.min(ITEMS_PER_AREA, poolSize);
+}
 
 export function expectedScore(ability: number, difficulty: number): number {
   return 1 / (1 + Math.pow(10, (difficulty - ability) / 400));
@@ -98,55 +110,50 @@ export interface DiagnosticAreaState {
 }
 
 /**
- * Picks the next item: any area under the 2-item-this-run floor takes absolute priority
- * (guarantees every KPI area gets covered even in a short run); otherwise the least-precise
- * area (highest rd) goes next. Within the chosen area, ranks unused questions by closeness
- * to the current ability estimate and weight-samples among the nearest few (rather than
- * always asking the single closest item) so a stable ability estimate doesn't keep drawing
- * the exact same question every run.
+ * Picks the next item: the least-covered area that still owes items this run goes next, so
+ * coverage fans out evenly instead of finishing one area before starting the next. Within the
+ * chosen area, ranks unused questions by closeness to the current ability estimate and
+ * weight-samples among the nearest few (rather than always asking the single closest item)
+ * so a stable ability estimate doesn't keep drawing the exact same question every run.
+ *
+ * Returns null once every area has met its target -- that is what ends a fixed-form run.
  */
 export function selectNextDiagnosticItem<Q extends QuestionRow>(
   areas: DiagnosticAreaState[],
   questionsByArea: Map<string, Q[]>,
   askedQuestionIds: Set<string>
 ): { kpiArea: string; question: Q } | null {
-  const eligibleAreas = areas.filter((a) => {
-    const remaining = (questionsByArea.get(a.kpiArea) ?? []).filter((q) => !askedQuestionIds.has(q.id));
-    return remaining.length > 0;
+  const owing = areas.filter((a) => {
+    const pool = questionsByArea.get(a.kpiArea) ?? [];
+    const remaining = pool.filter((q) => !askedQuestionIds.has(q.id));
+    return remaining.length > 0 && a.itemsThisRun < targetItemsForArea(pool.length);
   });
-  if (eligibleAreas.length === 0) return null;
+  if (owing.length === 0) return null;
 
-  const underFloor = eligibleAreas.filter((a) => a.itemsThisRun < MIN_ITEMS_PER_AREA_FLOOR);
-  const candidatePool = underFloor.length > 0 ? underFloor : eligibleAreas;
-
-  candidatePool.sort((a, b) => {
-    if (underFloor.length > 0) {
-      if (a.itemsThisRun !== b.itemsThisRun) return a.itemsThisRun - b.itemsThisRun;
-    } else if (a.rd !== b.rd) {
-      return b.rd - a.rd; // highest rd (least precise) first
-    }
-    return Math.random() - 0.5;
-  });
+  const candidatePool = shuffle(owing).sort((a, b) => a.itemsThisRun - b.itemsThisRun);
 
   const chosenArea = candidatePool[0]!;
   const remaining = (questionsByArea.get(chosenArea.kpiArea) ?? []).filter((q) => !askedQuestionIds.has(q.id));
-  const byCloseness = remaining
-    .slice()
-    .sort((a, b) => Math.abs(a.difficulty_rating - chosenArea.rating) - Math.abs(b.difficulty_rating - chosenArea.rating));
+  // Shuffle before the (stable) sort so questions tied on difficulty rotate fairly. Every
+  // imported question starts at the same 1500 rating, so without this the "nearest" window
+  // would just be the first CANDIDATE_WINDOW questions in array order every single run --
+  // the rest of a 46-question area would never be drawn until ratings diverged.
+  const byCloseness = shuffle(remaining).sort(
+    (a, b) => Math.abs(a.difficulty_rating - chosenArea.rating) - Math.abs(b.difficulty_rating - chosenArea.rating)
+  );
   const window = byCloseness.slice(0, CANDIDATE_WINDOW);
   const [picked] = weightedSampleWithoutReplacement(window, (q) => 1 / (1 + q.exposure_count), 1);
 
   return picked ? { kpiArea: chosenArea.kpiArea, question: picked } : null;
 }
 
-export type StopReason = 'converged' | 'soft_cap' | 'hard_cap' | null;
+export type StopReason = 'complete' | 'hard_cap' | null;
 
 /**
- * Stopping rule, checked after every answer: hard cap always wins (bounds worst-case test
- * length); otherwise stop once every area has hit the 2-item floor and is either precise
- * enough (rd <= 80) or fully exhausted (no more distinct questions left), and at least 20
- * items have been asked overall; otherwise a 30-item soft cap fires regardless so one
- * stubborn area can never hold the whole test hostage.
+ * Stopping rule, checked before each item: the run ends when every area has been asked its
+ * full target (`targetItemsForArea`), which for a healthy bank means exactly
+ * `areas x ITEMS_PER_AREA` questions. The hard cap is a safety bound only -- it should never
+ * fire in normal operation.
  */
 export function checkStop<Q extends QuestionRow>(
   areas: DiagnosticAreaState[],
@@ -155,14 +162,31 @@ export function checkStop<Q extends QuestionRow>(
 ): StopReason {
   if (totalItemsThisRun >= HARD_CAP_ITEMS) return 'hard_cap';
 
-  const allAreasReady = areas.every((a) => {
-    if (a.itemsThisRun < MIN_ITEMS_PER_AREA_FLOOR) return false;
+  const allAreasDone = areas.every((a) => {
     const poolSize = (questionsByArea.get(a.kpiArea) ?? []).length;
-    const exhausted = a.itemsThisRun >= poolSize;
-    return a.rd <= CONVERGENCE_RD_THRESHOLD || exhausted;
+    return a.itemsThisRun >= targetItemsForArea(poolSize);
   });
 
-  if (allAreasReady && totalItemsThisRun >= MIN_ITEMS_OVERALL_FOR_CONVERGENCE) return 'converged';
-  if (totalItemsThisRun >= SOFT_CAP_ITEMS) return 'soft_cap';
-  return null;
+  return allAreasDone ? 'complete' : null;
+}
+
+export type AreaTier = 'focus' | 'shaky' | 'solid';
+
+/**
+ * Buckets a finished area by raw score. Splitting "missed everything" from "missed one"
+ * matters at this test length: scripts/sim-diagnostic.ts shows a capable member still misses
+ * at least one of an area's two items ~66% of the time, so a flat "any miss = weak" would
+ * mark most of their strong areas weak. Scoring 0 of 2 is the sharp signal -- it shows up for
+ * ~88% of genuinely weak areas and only ~16% of strong ones.
+ */
+export function areaTier(r: { items_correct: number; items_in_area: number }): AreaTier {
+  if (r.items_correct === 0) return 'focus';
+  return r.items_correct < r.items_in_area ? 'shaky' : 'solid';
+}
+
+/** Total length of a fixed-form run over this bank -- drives the runner's progress display. */
+export function plannedItemCount<Q extends QuestionRow>(questionsByArea: Map<string, Q[]>): number {
+  let total = 0;
+  for (const pool of questionsByArea.values()) total += targetItemsForArea(pool.length);
+  return total;
 }
