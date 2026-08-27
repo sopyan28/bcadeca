@@ -60,7 +60,16 @@ export default async function PastConferencesPage() {
       {/* Left-aligned and capped at 72vw: the "Next Big Thing" lockup sits at roughly 78% of the
           viewport width in the background art, so a centred 1100px column ran the last photo
           underneath it. Tying the column to vw keeps that clearance at any width. */}
-      <main style={{ flex: 1, maxWidth: 'min(1100px, 72vw)', width: '100%', marginRight: 'auto', padding: '30px 22px 60px' }}>
+      <main
+        style={{
+          flex: 1,
+          maxWidth: 'min(1100px, 66vw)',
+          width: '100%',
+          marginLeft: 'clamp(22px, 5vw, 90px)',
+          marginRight: 'auto',
+          padding: '30px 22px 60px',
+        }}
+      >
         <h1 style={{ fontFamily: fonts.heading, fontWeight: 700, fontSize: 26, color: '#fff', marginBottom: 4, textShadow: '0 2px 18px rgba(6,10,40,.6)' }}>
           Past Conferences
         </h1>
