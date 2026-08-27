@@ -72,7 +72,7 @@ export default async function MembersPage() {
         <MembersSideNav />
         <div style={{ borderRadius: 9, overflow: 'hidden', border: `2px solid ${colors.border}`, boxShadow: '0 8px 20px rgba(20,80,150,.12)' }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/next-big-thing.png" alt="DECA Next Big Thing" style={{ width: '100%', height: 290, objectFit: 'cover', objectPosition: 'center top', display: 'block' }} />
+          <img src="/next-big-thing.webp" alt="DECA Next Big Thing" style={{ width: '100%', height: 290, objectFit: 'cover', objectPosition: 'center top', display: 'block' }} />
         </div>
         <a href="mailto:decaboard26-27@bergen.org" style={{ background: '#fff', border: `2px solid ${colors.border}`, borderRadius: 9, padding: 14, display: 'flex', flexDirection: 'column', gap: 6, textDecoration: 'none', boxShadow: '0 4px 0 #eef4f9' }}>
           <span style={{ fontWeight: 800, fontSize: 10.5, letterSpacing: '.6px', textTransform: 'uppercase', color: colors.textFaint }}>Questions?</span>
