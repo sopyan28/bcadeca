@@ -80,22 +80,22 @@ export function PracticeRunner({ clusters }: { clusters: string[] }) {
 
   if (phase === 'idle' || phase === 'loading') {
     return (
-      <div style={{ background: '#fff', border: `2px solid ${colors.border}`, borderRadius: 10, padding: 22 }}>
-        <div style={{ fontFamily: fonts.heading, fontWeight: 700, fontSize: 17, color: colors.navy, marginBottom: 14 }}>
-          Practice
+      <div>
+        <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: '.5px', textTransform: 'uppercase', color: colors.textFaint, marginBottom: 9 }}>
+          Earn XP &amp; DECA$
         </div>
-        <div style={{ display: 'flex', gap: 12 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 9 }}>
           {MODES.map((m) => (
             <button
               key={m.mode}
               disabled={phase === 'loading'}
               onClick={() => (m.mode === 'cluster' ? setPickingCluster(true) : launch(m.mode))}
               style={{
-                flex: 1,
+                width: '100%',
                 textAlign: 'left',
                 border: `2px solid ${pickingCluster && m.mode === 'cluster' ? colors.blue : colors.border}`,
-                borderRadius: 8,
-                padding: '14px 16px',
+                borderRadius: 7,
+                padding: '13px 14px',
                 cursor: 'pointer',
                 background: colors.bg,
               }}
@@ -137,7 +137,8 @@ export function PracticeRunner({ clusters }: { clusters: string[] }) {
 
   if (phase === 'summary' && session) {
     return (
-      <div style={{ background: '#fff', border: `2px solid ${colors.border}`, borderRadius: 10, padding: 22, textAlign: 'center' }}>
+      <Modal>
+      <div style={{ textAlign: 'center' }}>
         <div style={{ fontSize: 40 }}>{correctCount === session.questions.length ? '🎉' : '✅'}</div>
         <div style={{ fontFamily: fonts.heading, fontWeight: 700, fontSize: 18, color: colors.navy, marginTop: 8 }}>
           {correctCount}/{session.questions.length} correct
@@ -152,13 +153,15 @@ export function PracticeRunner({ clusters }: { clusters: string[] }) {
           Practice again
         </button>
       </div>
+      </Modal>
     );
   }
 
   if (phase === 'running' && session) {
     const question = session.questions[index]!;
     return (
-      <div style={{ background: '#fff', border: `2px solid ${colors.border}`, borderRadius: 10, padding: 22 }}>
+      <Modal>
+      <div>
         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12.5, fontWeight: 700, color: colors.textMuted, marginBottom: 10 }}>
           <span>{question.kpi_area}</span>
           <span>
@@ -215,8 +218,48 @@ export function PracticeRunner({ clusters }: { clusters: string[] }) {
           </div>
         )}
       </div>
+      </Modal>
     );
   }
 
   return null;
+}
+
+/**
+ * A running session takes over the screen rather than rendering inside the 300px arena
+ * sidebar, matching the design prototype's question modal -- four answer choices and an
+ * explanation don't fit in a sidebar column.
+ */
+function Modal({ children }: { children: React.ReactNode }) {
+  return (
+    <div
+      style={{
+        position: 'fixed',
+        inset: 0,
+        zIndex: 300,
+        background: 'rgba(14,58,99,.55)',
+        backdropFilter: 'blur(4px)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 20,
+      }}
+    >
+      <div
+        style={{
+          background: '#fff',
+          borderRadius: 14,
+          width: '100%',
+          maxWidth: 560,
+          padding: 24,
+          boxShadow: '0 30px 70px rgba(10,40,80,.35)',
+          animation: 'pop .25s ease',
+          maxHeight: '86vh',
+          overflowY: 'auto',
+        }}
+      >
+        {children}
+      </div>
+    </div>
+  );
 }

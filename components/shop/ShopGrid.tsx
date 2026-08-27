@@ -65,11 +65,12 @@ export function ShopGrid({
     });
   }
 
+  // No card chrome: this renders inside the arena sidebar's panel, which supplies it.
   return (
-    <div style={{ background: '#fff', border: `2px solid ${colors.border}`, borderRadius: 10, padding: 20 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-        <div style={{ fontFamily: fonts.heading, fontWeight: 700, fontSize: 16, color: colors.navy }}>🛍️ Shop</div>
-        <div style={{ fontWeight: 800, fontSize: 14, color: colors.goldText }}>💰 {balance} DECA$</div>
+    <div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+        <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: '.5px', textTransform: 'uppercase', color: colors.textFaint }}>Shop</div>
+        <div style={{ fontWeight: 800, fontSize: 13, color: colors.goldText }}>💰 {balance} DECA$</div>
       </div>
 
       {message && <div style={{ fontSize: 13, color: colors.redDark, fontWeight: 700, marginBottom: 10 }}>{message}</div>}
@@ -114,7 +115,7 @@ function ShopSectionGrid({
   onToggleEquip: (item: ShopItemRow) => void;
 }) {
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 12 }}>
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(118px, 1fr))', gap: 10 }}>
         {items.map((item) => {
           const isOwned = owned.has(item.id);
           const isEquippable = item.kind !== 'power' && item.slot;
