@@ -1,7 +1,7 @@
 import { colors } from '@/lib/ui/tokens';
 
 export interface MissedRow {
-  attempt_id: string;
+  attempt_id: number;
   kpi_area: string;
   question_text: string;
   chosen_text: string;

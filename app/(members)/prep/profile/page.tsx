@@ -6,7 +6,7 @@ import { Penguin, type PenguinEquipped } from '@/components/penguin/Penguin';
 
 /** Return shape of get_missed_question_review (supabase/migrations/0008_missed_question_review.sql). */
 interface MissedReviewRow {
-  attempt_id: string;
+  attempt_id: number;
   kpi_area: string;
   question_text: string;
   chosen_text: string;

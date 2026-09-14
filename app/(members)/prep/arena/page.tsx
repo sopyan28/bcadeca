@@ -24,7 +24,7 @@ export default async function ArenaPage() {
   ] = await Promise.all([
     supabase.from('public_profiles').select('id, full_name, xp, level, avatar_color, streak_count').order('xp', { ascending: false }).limit(25),
     supabase.rpc('member_count'),
-    // Defined in migration 0013. Until that's run this errors, data stays null, and the leaderboard just omits it.
+    // Defined in migration 0014. Until that's run this errors, data stays null, and the leaderboard just omits it.
     supabase.rpc('active_member_count', { p_days: 7 }),
     supabase.from('shop_items').select('id, name, icon, kind, slot, price').eq('active', true),
     user ? supabase.from('user_inventory').select('item_id').eq('user_id', user.id) : Promise.resolve({ data: [] as { item_id: string }[] }),
