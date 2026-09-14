@@ -80,3 +80,13 @@ input, select, textarea { font: inherit; }
   border: 0;
   display: block;
 }
+
+/* Header nav: one line on every page. When the row runs out of room the links scroll sideways
+   rather than wrapping onto two lines. */
+.site-nav {
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.site-nav::-webkit-scrollbar {
+  display: none;
+}

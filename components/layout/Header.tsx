@@ -20,10 +20,14 @@ const NAV_LINKS = [
   { href: '/find-your-event', label: 'Find Your Event' },
   { href: '/members', label: 'Members' },
   { href: '/prep', label: 'Prep' },
-  { href: '/jeopardy', label: 'Jeopardy' },
   { href: '/past-conferences', label: 'Past Conferences' },
 ];
 
+/**
+ * Pages render this through <SiteHeader />, which loads the member's stats, so it looks the same
+ * everywhere. Nothing in the row wraps: the logo and stats hold their size, and if the row runs
+ * out of room the nav links scroll sideways instead (.site-nav in globals.css).
+ */
 export function Header({ stats }: { stats?: HeaderStats | null }) {
   const pathname = usePathname();
 
@@ -39,7 +43,7 @@ export function Header({ stats }: { stats?: HeaderStats | null }) {
       }}
     >
       <div style={{ maxWidth: 1180, margin: '0 auto', padding: '11px 22px', display: 'flex', alignItems: 'center', gap: 18 }}>
-        <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}>
+        <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', flexShrink: 0 }}>
           <div
             style={{
               width: 38,
@@ -55,7 +59,7 @@ export function Header({ stats }: { stats?: HeaderStats | null }) {
           >
             🐧
           </div>
-          <div style={{ lineHeight: 1.05 }}>
+          <div style={{ lineHeight: 1.05, whiteSpace: 'nowrap' }}>
             <div style={{ fontFamily: fonts.heading, fontWeight: 800, fontSize: 19, color: colors.navy }}>
               BCA <span style={{ color: '#1b8ad6' }}>DECA</span>
             </div>
@@ -65,7 +69,7 @@ export function Header({ stats }: { stats?: HeaderStats | null }) {
           </div>
         </Link>
 
-        <nav style={{ display: 'flex', gap: 4, marginLeft: 8 }}>
+        <nav className="site-nav" style={{ display: 'flex', gap: 4, marginLeft: 8, minWidth: 0 }}>
           {(stats?.isOfficer ? [...NAV_LINKS, { href: '/officer', label: 'Board' }] : NAV_LINKS).map((link) => {
             const isActive = link.href === '/' ? pathname === '/' : pathname.startsWith(link.href);
             return (
@@ -81,6 +85,7 @@ export function Header({ stats }: { stats?: HeaderStats | null }) {
                   borderRadius: 5,
                   color: isActive ? '#1b8ad6' : colors.navy,
                   textDecoration: 'none',
+                  whiteSpace: 'nowrap',
                 }}
               >
                 {link.label}
@@ -105,7 +110,7 @@ export function Header({ stats }: { stats?: HeaderStats | null }) {
         <div style={{ flex: 1 }} />
 
         {stats ? (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0, whiteSpace: 'nowrap' }}>
             <div
               style={{
                 display: 'flex',
@@ -178,6 +183,7 @@ export function Header({ stats }: { stats?: HeaderStats | null }) {
                   fontWeight: 800,
                   fontSize: 13,
                   color: colors.textSecondary,
+                  whiteSpace: 'nowrap',
                 }}
               >
                 Log out
@@ -196,6 +202,8 @@ export function Header({ stats }: { stats?: HeaderStats | null }) {
               padding: '9px 16px',
               borderRadius: 6,
               boxShadow: `0 4px 0 ${colors.blueShadow}`,
+              flexShrink: 0,
+              whiteSpace: 'nowrap',
             }}
           >
             Log in

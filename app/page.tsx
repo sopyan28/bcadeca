@@ -1,36 +1,11 @@
 import Link from 'next/link';
-import { createClient } from '@/lib/supabase/server';
-import { Header } from '@/components/layout/Header';
+import { SiteHeader } from '@/components/layout/SiteHeader';
 import { colors, fonts, pressedButton } from '@/lib/ui/tokens';
 
-export default async function HomePage() {
-  const supabase = await createClient();
-
-  const { data: userRes } = await supabase.auth.getUser();
-
-  let stats = null;
-  if (userRes.user) {
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('level, xp, xp_in_level, xp_next, deca_balance, streak_count, role')
-      .eq('id', userRes.user.id)
-      .single();
-    if (profile) {
-      stats = {
-        level: profile.level as number,
-        xp: profile.xp as number,
-        xpInLevel: profile.xp_in_level as number,
-        xpNext: profile.xp_next as number,
-        decaBalance: profile.deca_balance as number,
-        streakCount: profile.streak_count as number,
-        isOfficer: profile.role === 'officer',
-      };
-    }
-  }
-
+export default function HomePage() {
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: colors.bg }}>
-      <Header stats={stats} />
+      <SiteHeader />
 
       <main style={{ flex: 1 }}>
         <div style={{ width: '100%', height: 'clamp(240px, 28vw, 500px)', overflow: 'hidden' }}>

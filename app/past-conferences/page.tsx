@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
-import { Header } from '@/components/layout/Header';
+import { SiteHeader } from '@/components/layout/SiteHeader';
 import { PolaroidWall, type Photo } from '@/components/gallery/PolaroidWall';
 import { fonts } from '@/lib/ui/tokens';
 
@@ -56,7 +56,7 @@ export default async function PastConferencesPage() {
         backgroundRepeat: 'no-repeat',
       }}
     >
-      <Header />
+      <SiteHeader />
       {/* Left-aligned and capped at 72vw: the "Next Big Thing" lockup sits at roughly 78% of the
           viewport width in the background art, so a centred 1100px column ran the last photo
           underneath it. Tying the column to vw keeps that clearance at any width. */}
