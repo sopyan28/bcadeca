@@ -20,6 +20,7 @@ const NAV_LINKS = [
   { href: '/find-your-event', label: 'Find Your Event' },
   { href: '/members', label: 'Members' },
   { href: '/prep', label: 'Prep' },
+  { href: '/jeopardy', label: 'Jeopardy' },
   { href: '/past-conferences', label: 'Past Conferences' },
 ];
 

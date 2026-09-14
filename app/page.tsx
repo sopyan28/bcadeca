@@ -97,7 +97,7 @@ export default async function HomePage() {
                 <br />
                 Let&apos;s see who will be the next big thing!
               </p>
-              <div style={{ display: 'flex', gap: 12, marginTop: 26 }}>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, marginTop: 26 }}>
                 <Link
                   href="/prep"
                   style={{ ...pressedButton(colors.blue, colors.blueShadow), fontFamily: fonts.heading, fontSize: 16, padding: '14px 24px', display: 'inline-block' }}
@@ -119,6 +119,12 @@ export default async function HomePage() {
                   }}
                 >
                   Members area
+                </Link>
+                <Link
+                  href="/jeopardy"
+                  style={{ ...pressedButton(colors.gold, colors.goldShadow), color: colors.navy, fontFamily: fonts.heading, fontSize: 16, padding: '14px 24px', display: 'inline-block' }}
+                >
+                  Play Jeopardy →
                 </Link>
               </div>
             </div>
