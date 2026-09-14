@@ -13,6 +13,8 @@ export default async function ArenaPage() {
 
   const [
     { data: leaderboardRows },
+    { data: memberCount },
+    { data: activeCount },
     { data: shopItems },
     { data: inventory },
     { data: equipped },
@@ -21,6 +23,9 @@ export default async function ArenaPage() {
     { data: missed },
   ] = await Promise.all([
     supabase.from('public_profiles').select('id, full_name, xp, level, avatar_color, streak_count').order('xp', { ascending: false }).limit(25),
+    supabase.rpc('member_count'),
+    // Defined in migration 0013. Until that's run this errors, data stays null, and the leaderboard just omits it.
+    supabase.rpc('active_member_count', { p_days: 7 }),
     supabase.from('shop_items').select('id, name, icon, kind, slot, price').eq('active', true),
     user ? supabase.from('user_inventory').select('item_id').eq('user_id', user.id) : Promise.resolve({ data: [] as { item_id: string }[] }),
     user ? supabase.from('user_equipped').select('slot, item_id').eq('user_id', user.id) : Promise.resolve({ data: [] as { slot: string; item_id: string }[] }),
@@ -34,8 +39,9 @@ export default async function ArenaPage() {
   const missedRows = (missed ?? []) as MissedRow[];
 
   // Sidebar left, ocean right -- the arena layout from the design prototype's arenaMain().
+  // Stacks on narrow screens; see .arena-grid in globals.css.
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 300px) minmax(0, 1fr)', gap: 16, alignItems: 'start' }}>
+    <div className="arena-grid">
       <ArenaSidebar
         missedCount={missedRows.length}
         practice={<PracticeRunner clusters={clusters} />}
@@ -49,7 +55,12 @@ export default async function ArenaPage() {
           />
         }
       />
-      <Leaderboard initialRows={leaderboardRows ?? []} currentUserId={user?.id ?? ''} />
+      <Leaderboard
+        initialRows={leaderboardRows ?? []}
+        currentUserId={user?.id ?? ''}
+        memberCount={memberCount == null ? null : Number(memberCount)}
+        activeCount={activeCount == null ? null : Number(activeCount)}
+      />
     </div>
   );
 }

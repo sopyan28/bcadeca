@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useTransition } from 'react';
+import { createPortal } from 'react-dom';
 import { useRouter } from 'next/navigation';
 import { colors, fonts, pressedButton } from '@/lib/ui/tokens';
 import { startPracticeSession, submitAnswer, finishPracticeSession, type StartSessionResult, type AnswerResult } from '@/app/(members)/prep/arena/actions';
@@ -229,9 +230,15 @@ export function PracticeRunner({ clusters }: { clusters: string[] }) {
  * A running session takes over the screen rather than rendering inside the 300px arena
  * sidebar, matching the design prototype's question modal -- four answer choices and an
  * explanation don't fit in a sidebar column.
+ *
+ * Portaled to <body>: the sidebar is position: sticky, which traps everything inside it in the
+ * sidebar's own stacking layer. Rendered in place, the leaderboard's sky, water and penguins
+ * painted over this modal and swallowed clicks on the answer choices beneath them.
  */
 function Modal({ children }: { children: React.ReactNode }) {
-  return (
+  // Only ever opened by a click, so document exists; the guard just keeps server rendering safe.
+  if (typeof document === 'undefined') return null;
+  return createPortal(
     <div
       style={{
         position: 'fixed',
@@ -260,6 +267,7 @@ function Modal({ children }: { children: React.ReactNode }) {
       >
         {children}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

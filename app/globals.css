@@ -44,3 +44,22 @@ input, select, textarea { font: inherit; }
 @media (prefers-reduced-motion: reduce) {
   .polaroid, .polaroid-cap { transition: none; }
 }
+
+/* Arena: sidebar beside the ocean on wide screens, stacked on narrow ones (phones, small or
+   zoomed-in laptop windows), where the 300px sidebar would crush the leaderboard to a sliver. */
+.arena-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 300px) minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+@media (max-width: 900px) {
+  .arena-grid { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* The leaderboard's podium row scrolls sideways once the chapter outgrows the scene. Windows and
+   Firefox always draw that scrollbar, so keep it slim instead of a thick bar across the water. */
+.ice-row {
+  scrollbar-width: thin;
+  scrollbar-color: #9cc8ec transparent;
+}

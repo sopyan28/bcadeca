@@ -21,7 +21,7 @@ export async function signUp(_prev: ActionState, formData: FormData): Promise<Ac
 
   const supabase = await createClient();
   const origin = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
-  const { error } = await supabase.auth.signUp({
+  const { data, error } = await supabase.auth.signUp({
     email,
     password,
     options: {
@@ -48,6 +48,10 @@ export async function signUp(_prev: ActionState, formData: FormData): Promise<Ac
     }
     return { error: raw || 'Could not create your account. Please try again.' };
   }
+
+  // With "Confirm email" turned off in Supabase, signUp returns a live session, so members go
+  // straight in. While it's still on there's no session yet: fall back to the check-your-email screen.
+  if (data.session) redirect('/prep/arena');
 
   return { message: 'Check your school email for a verification link to finish signing up.' };
 }

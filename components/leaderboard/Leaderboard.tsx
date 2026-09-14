@@ -23,6 +23,9 @@ export interface LeaderboardRow {
 const SCENE_HEIGHT = 430;
 const MIN_COLUMN = 26;
 const MAX_COLUMN = 210;
+/** Penguin.tsx draws into a fixed 50x68 box. */
+const PENGUIN_WIDTH = 50;
+const PENGUIN_HEIGHT = 68;
 const MEDALS: Record<number, string> = { 1: '🥇', 2: '🥈', 3: '🥉' };
 
 function columnWidth(rank: number) {
@@ -42,6 +45,7 @@ function penguinScale(rank: number) {
 function Podium({ row, rank, maxXp, isMe }: { row: LeaderboardRow; rank: number; maxXp: number; isMe: boolean }) {
   const height = Math.round(MIN_COLUMN + (row.xp / maxXp) * (MAX_COLUMN - MIN_COLUMN));
   const width = columnWidth(rank);
+  const scale = penguinScale(rank);
   const medal = MEDALS[rank];
   const iceGradient = isMe
     ? 'linear-gradient(180deg,#fff4c4,#ffe27a 55%,#f4c63a)'
@@ -61,9 +65,13 @@ function Podium({ row, rank, maxXp, isMe }: { row: LeaderboardRow; rank: number;
         </div>
       </div>
 
-      <div style={{ transform: `scale(${penguinScale(rank)})`, transformOrigin: 'bottom center' }}>
-        <div style={{ animation: `pfloat ${(2.6 + rank * 0.13).toFixed(2)}s ease-in-out infinite`, transformOrigin: 'bottom center' }}>
-          <Penguin color={row.avatar_color} />
+      {/* scale() doesn't change an element's layout size, so reserve the scaled box explicitly --
+          scaling in place left the smaller penguins floating well below their names. */}
+      <div style={{ width: PENGUIN_WIDTH * scale, height: PENGUIN_HEIGHT * scale }}>
+        <div style={{ width: PENGUIN_WIDTH, height: PENGUIN_HEIGHT, transform: `scale(${scale})`, transformOrigin: 'top left' }}>
+          <div style={{ animation: `pfloat ${(2.6 + rank * 0.13).toFixed(2)}s ease-in-out infinite`, transformOrigin: 'bottom center' }}>
+            <Penguin color={row.avatar_color} />
+          </div>
         </div>
       </div>
 
@@ -91,19 +99,36 @@ function Podium({ row, rank, maxXp, isMe }: { row: LeaderboardRow; rank: number;
   );
 }
 
-export function Leaderboard({ initialRows, currentUserId }: { initialRows: LeaderboardRow[]; currentUserId: string }) {
+export function Leaderboard({
+  initialRows,
+  currentUserId,
+  memberCount: initialMemberCount = null,
+  activeCount = null,
+}: {
+  initialRows: LeaderboardRow[];
+  currentUserId: string;
+  /** Everyone signed up. The ice only holds the top 25, so rows.length undercounts past that. */
+  memberCount?: number | null;
+  /** Members who signed in or practiced in the last week (active_member_count RPC); null hides it. */
+  activeCount?: number | null;
+}) {
   const [rows, setRows] = useState(initialRows);
+  const [memberCount, setMemberCount] = useState(initialMemberCount);
 
   useEffect(() => {
     const supabase = createClient();
 
     async function refetch() {
-      const { data } = await supabase
-        .from('public_profiles')
-        .select('id, full_name, xp, level, avatar_color, streak_count')
-        .order('xp', { ascending: false })
-        .limit(25);
+      const [{ data }, { data: count }] = await Promise.all([
+        supabase
+          .from('public_profiles')
+          .select('id, full_name, xp, level, avatar_color, streak_count')
+          .order('xp', { ascending: false })
+          .limit(25),
+        supabase.rpc('member_count'),
+      ]);
       if (data) setRows(data as LeaderboardRow[]);
+      if (count != null) setMemberCount(Number(count));
     }
 
     const channel = supabase
@@ -118,13 +143,15 @@ export function Leaderboard({ initialRows, currentUserId }: { initialRows: Leade
 
   // Everyone at 0 XP would divide by zero and flatten the ice to nothing; floor it at 1.
   const maxXp = Math.max(rows[0]?.xp ?? 0, 1);
+  const totalMembers = memberCount ?? rows.length;
 
   return (
     <div style={{ background: '#fff', border: `2px solid ${colors.border}`, borderRadius: 9, overflow: 'hidden' }}>
-      <div style={{ padding: '14px 18px', borderBottom: `2px solid ${colors.borderFaint}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
+      <div style={{ padding: '14px 18px', borderBottom: `2px solid ${colors.borderFaint}`, display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
         <div style={{ fontFamily: fonts.heading, fontWeight: 700, fontSize: 18, color: colors.navy }}>🏆 The Leaderboard</div>
         <div style={{ fontSize: 12, fontWeight: 800, color: '#1c7fc4', background: '#e9f6ff', border: '1.5px solid #bfe2fa', borderRadius: 10, padding: '5px 12px', whiteSpace: 'nowrap' }}>
-          {rows.length} member{rows.length === 1 ? '' : 's'}
+          {totalMembers} member{totalMembers === 1 ? '' : 's'}
+          {activeCount != null && ` · ${activeCount} active this week`}
         </div>
       </div>
 
@@ -133,7 +160,7 @@ export function Leaderboard({ initialRows, currentUserId }: { initialRows: Leade
         <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: 90, background: 'linear-gradient(180deg,#5cb8ef,#2f97e0)', borderTop: '3px solid rgba(255,255,255,.5)', zIndex: 1 }} />
 
         {rows.length > 0 ? (
-          <div style={{ position: 'absolute', inset: 0, overflowX: 'auto', overflowY: 'hidden', display: 'flex', alignItems: 'flex-end', gap: 6, padding: '18px 26px 70px', zIndex: 2 }}>
+          <div className="ice-row" style={{ position: 'absolute', inset: 0, overflowX: 'auto', overflowY: 'hidden', display: 'flex', alignItems: 'flex-end', gap: 6, padding: '18px 26px 70px', zIndex: 2 }}>
             {rows.map((row, i) => (
               <Podium key={row.id} row={row} rank={i + 1} maxXp={maxXp} isMe={row.id === currentUserId} />
             ))}
