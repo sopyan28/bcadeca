@@ -1,8 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { colors, fonts, fieldStyle, pressedButton } from '@/lib/ui/tokens';
+import { BLAZER_GROUPS, blazerKey } from '@/lib/blazers';
 import { setBlazerCount } from '../actions';
-
-const SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
 
 export default async function OfficerBlazersPage() {
   const supabase = await createClient();
@@ -21,24 +20,34 @@ export default async function OfficerBlazersPage() {
       <div style={{ fontFamily: fonts.heading, fontWeight: 700, fontSize: 16, color: colors.navy, marginBottom: 14 }}>
         Blazer inventory
       </div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-        {SIZES.map((size) => (
-          <form key={size} action={update} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <input type="hidden" name="size" value={size} />
-            <div style={{ width: 40, fontWeight: 800, fontSize: 14, color: colors.navy }}>{size}</div>
-            <input
-              name="count"
-              type="number"
-              min={0}
-              defaultValue={countBySize.get(size) ?? 0}
-              style={{ ...fieldStyle, width: 90 }}
-            />
-            <button type="submit" style={{ ...pressedButton(colors.blue, colors.blueShadow), padding: '9px 16px', fontSize: 13 }}>
-              Save
-            </button>
-          </form>
-        ))}
-      </div>
+      {BLAZER_GROUPS.map((group) => (
+        <div key={group.key} style={{ marginBottom: 18 }}>
+          <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: 0.5, color: colors.textFaint, marginBottom: 8 }}>
+            {group.label}
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {group.sizes.map((size) => {
+              const key = blazerKey(group.key, size);
+              return (
+                <form key={key} action={update} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <input type="hidden" name="size" value={key} />
+                  <div style={{ width: 48, fontWeight: 800, fontSize: 14, color: colors.navy }}>{size}</div>
+                  <input
+                    name="count"
+                    type="number"
+                    min={0}
+                    defaultValue={countBySize.get(key) ?? 0}
+                    style={{ ...fieldStyle, width: 90 }}
+                  />
+                  <button type="submit" style={{ ...pressedButton(colors.blue, colors.blueShadow), padding: '9px 16px', fontSize: 13 }}>
+                    Save
+                  </button>
+                </form>
+              );
+            })}
+          </div>
+        </div>
+      ))}
     </div>
   );
 }

@@ -1,22 +1,19 @@
 import { createClient } from '@/lib/supabase/server';
 import { colors, fonts, fieldStyle, pressedButton } from '@/lib/ui/tokens';
+import { BLAZER_GROUPS, blazerKey } from '@/lib/blazers';
 import { requestTrifold } from './actions';
 import { MembersSideNav } from '@/components/members/MembersSideNav';
+import { BlazerSizeChart } from '@/components/members/BlazerSizeChart';
 
-const BLAZER_SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
-
+// Season 26–27. `end` is the last day, inclusive: steps before today are done and the first one
+// that isn't is up next, so the timeline moves along on its own through the year.
 const SEASON_TIMELINE = [
-  { date: 'Oct 15', label: 'Chapter kickoff & event sign-ups', done: true, now: false },
-  { date: 'Nov–Jan', label: 'Weekly prep + practice role-plays', done: true, now: false },
-  { date: 'Feb 12', label: 'Regionals', done: true, now: false },
-  { date: 'Mar 5–7', label: 'SCDC', done: false, now: true },
-  { date: 'Apr 25–28', label: 'ICDC', done: false, now: false },
-] as const;
-
-const CONFERENCES = [
-  { key: 'SCDC', name: 'SCDC', location: 'Atlantic City, NJ · Mar 5–7', color: colors.blue },
-  { key: 'ICDC', name: 'ICDC', location: 'Orlando, FL · Apr 25–28', color: colors.purple },
-] as const;
+  { end: '2026-10-15', date: 'Oct 15', label: 'Chapter kickoff & event sign-ups' },
+  { end: '2027-01-10', date: 'Nov–Jan', label: 'Weekly prep + practice role-plays' },
+  { end: '2027-01-11', date: 'Jan 11', label: 'Regionals' },
+  { end: '2027-03-04', date: 'Mar 2–4', label: 'SCDC' },
+  { end: '2027-04-20', date: 'Apr 17–20', label: 'ICDC' },
+];
 
 const DOC_TYPES = [
   { key: 'permission_slip', icon: '📝', label: 'Permission slip', hint: 'Required · due 2 weeks prior' },
@@ -24,12 +21,91 @@ const DOC_TYPES = [
   { key: 'rooming_form', icon: '🛏️', label: 'Rooming form', hint: 'Pick roommates (4 per room)' },
 ] as const;
 
+type DocType = (typeof DOC_TYPES)[number];
+
+interface Conference {
+  key: string;
+  name: string;
+  details: string;
+  icon: string;
+  /** Last day, inclusive. */
+  end: string;
+  color: string;
+  docs: readonly DocType[];
+}
+
+// Regionals only collects a permission slip -- no packing list or rooming form.
+const REGIONALS: Conference = { key: 'REGIONALS', name: 'Regionals', details: 'Jan 11', icon: '📍', end: '2027-01-11', color: colors.green, docs: [DOC_TYPES[0]] };
+const OVERNIGHT_CONFERENCES: Conference[] = [
+  { key: 'SCDC', name: 'SCDC', details: 'Atlantic City, NJ · Mar 2–4', icon: '🏨', end: '2027-03-04', color: colors.blue, docs: DOC_TYPES },
+  { key: 'ICDC', name: 'ICDC', details: 'Anaheim, CA · Apr 17–20', icon: '🏨', end: '2027-04-20', color: colors.purple, docs: DOC_TYPES },
+];
+const CONFERENCES = [REGIONALS, ...OVERNIGHT_CONFERENCES];
+
 const TRIFOLD_STATUS_COLORS: Record<string, string> = {
   pending: colors.goldText,
   approved: colors.green,
   denied: colors.redDark,
   fulfilled: colors.blue,
 };
+
+function ConferenceCard({ conf, wide = false, comingSoon, docUrls }: { conf: Conference; wide?: boolean; comingSoon: boolean; docUrls: Map<string, string> }) {
+  return (
+    <div
+      className={comingSoon ? 'conf-upcoming' : undefined}
+      style={{
+        border: `2px solid ${colors.borderFaint}`,
+        borderRadius: 8,
+        padding: 20,
+        display: 'flex',
+        flexDirection: wide ? 'row' : 'column',
+        flexWrap: 'wrap',
+        alignItems: wide ? 'center' : 'stretch',
+        gap: wide ? 24 : 14,
+      }}
+    >
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, minWidth: wide ? 200 : undefined }}>
+        <div>
+          <div style={{ fontFamily: fonts.heading, fontWeight: 700, fontSize: 19, color: colors.navy }}>{conf.name}</div>
+          <div style={{ fontSize: 12.5, fontWeight: 700, color: colors.textMuted }}>{conf.details}</div>
+        </div>
+        {comingSoon ? (
+          <span style={{ fontSize: 11, fontWeight: 800, color: colors.textSecondary, background: '#fff', border: `1.5px solid ${colors.borderLight}`, borderRadius: 10, padding: '4px 10px', whiteSpace: 'nowrap' }}>
+            Coming soon
+          </span>
+        ) : (
+          <span style={{ fontSize: 24 }}>{conf.icon}</span>
+        )}
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 9, flex: wide ? '1 1 320px' : undefined }}>
+        {conf.docs.map((doc) => {
+          const url = docUrls.get(`${conf.key}:${doc.key}`);
+          return (
+            <div key={doc.key} style={{ display: 'flex', alignItems: 'center', gap: 12, border: `1.5px solid ${colors.borderFaint}`, borderRadius: 6, padding: '11px 13px', background: '#fff' }}>
+              <span style={{ fontSize: 18 }}>{doc.icon}</span>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: 14, fontWeight: 800, color: colors.navy }}>{doc.label}</div>
+                <div style={{ fontSize: 11.5, fontWeight: 600, color: colors.textMuted }}>{doc.hint}</div>
+              </div>
+              {url ? (
+                <a
+                  href={url}
+                  target="_blank"
+                  rel="noreferrer"
+                  style={{ border: 'none', cursor: 'pointer', fontFamily: fonts.body, fontWeight: 800, fontSize: 12, color: '#fff', background: conf.color, padding: '8px 13px', borderRadius: 5, textDecoration: 'none' }}
+                >
+                  Open
+                </a>
+              ) : (
+                <span style={{ fontSize: 11.5, fontWeight: 700, color: colors.textMuted }}>Not uploaded yet</span>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
 
 export default async function MembersPage() {
   const supabase = await createClient();
@@ -60,6 +136,13 @@ export default async function MembersPage() {
       if (data?.signedUrl) signedUrlByKey.set(key, data.signedUrl);
     })
   );
+
+  // YYYY-MM-DD in New Jersey, so dates roll over at local midnight rather than UTC's.
+  const today = new Date().toLocaleDateString('en-CA', { timeZone: 'America/New_York' });
+  const nextStepIndex = SEASON_TIMELINE.findIndex((step) => step.end >= today);
+  // Only the next conference is open; the ones after it haven't started yet and get the stripes.
+  const nextConferenceIndex = CONFERENCES.findIndex((conf) => conf.end >= today);
+  const isComingSoon = (conf: Conference) => nextConferenceIndex !== -1 && CONFERENCES.indexOf(conf) > nextConferenceIndex;
 
   async function submitTrifold(formData: FormData) {
     'use server';
@@ -110,21 +193,31 @@ export default async function MembersPage() {
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: 16, alignItems: 'start' }}>
           <div style={{ border: `2px solid ${colors.borderFaint}`, borderRadius: 8, padding: 18 }}>
-            <div style={{ fontWeight: 800, fontSize: 14, color: colors.navy, marginBottom: 12 }}>👔 Blazer inventory</div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 9 }}>
-              {BLAZER_SIZES.map((size) => {
-                const count = countBySize.get(size) ?? 0;
-                return (
-                  <div key={size} style={{ border: `2px solid ${colors.borderFaint}`, borderRadius: 6, padding: '10px 8px', textAlign: 'center' }}>
-                    <div style={{ fontFamily: fonts.heading, fontWeight: 800, fontSize: 18, color: colors.navy }}>{size}</div>
-                    <div style={{ fontSize: 11.5, fontWeight: 800, color: count > 0 ? colors.green : colors.redDark, marginTop: 2 }}>
-                      {count > 0 ? `${count} available` : 'Out'}
-                    </div>
-                  </div>
-                );
-              })}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, marginBottom: 12 }}>
+              <div style={{ fontWeight: 800, fontSize: 14, color: colors.navy }}>👔 Blazer inventory</div>
+              <BlazerSizeChart counts={Object.fromEntries(countBySize)} />
             </div>
-            <div style={{ fontSize: 12, color: colors.textMuted, marginTop: 12, lineHeight: 1.5 }}>
+            {BLAZER_GROUPS.map((group) => (
+              <div key={group.key} style={{ marginBottom: 12 }}>
+                <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: 0.5, color: colors.textFaint, marginBottom: 7 }}>
+                  {group.label}
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
+                  {group.sizes.map((size) => {
+                    const count = countBySize.get(blazerKey(group.key, size)) ?? 0;
+                    return (
+                      <div key={size} style={{ border: `2px solid ${colors.borderFaint}`, borderRadius: 6, padding: '9px 6px', textAlign: 'center' }}>
+                        <div style={{ fontFamily: fonts.heading, fontWeight: 800, fontSize: 16, color: colors.navy }}>{size}</div>
+                        <div style={{ fontSize: 11, fontWeight: 800, color: count > 0 ? colors.green : colors.redDark, marginTop: 2 }}>
+                          {count > 0 ? `${count} available` : 'Out'}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+            <div style={{ fontSize: 12, color: colors.textMuted, marginTop: 4, lineHeight: 1.5 }}>
               Ask a board member to check one out. Blazers are due back within 3 days of your conference.
             </div>
           </div>
@@ -169,71 +262,45 @@ export default async function MembersPage() {
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', position: 'relative' }}>
             <div style={{ position: 'absolute', top: 11, left: '6%', right: '6%', height: 3, background: colors.borderFaint }} />
-            {SEASON_TIMELINE.map((e, i) => (
-              <div key={i} style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', width: '20%', textAlign: 'center', zIndex: 1 }}>
-                <div
-                  style={{
-                    width: 24,
-                    height: 24,
-                    borderRadius: '50%',
-                    background: e.done ? colors.green : e.now ? colors.gold : '#fff',
-                    border: `3px solid ${e.done ? colors.green : e.now ? colors.gold : colors.borderLight}`,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: 11,
-                    color: '#fff',
-                    fontWeight: 800,
-                    marginBottom: 8,
-                  }}
-                >
-                  {e.done ? '✓' : e.now ? '!' : ''}
+            {SEASON_TIMELINE.map((step, i) => {
+              const done = step.end < today;
+              const now = i === nextStepIndex;
+              return (
+                <div key={step.label} style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', width: '20%', textAlign: 'center', zIndex: 1 }}>
+                  <div
+                    style={{
+                      width: 24,
+                      height: 24,
+                      borderRadius: '50%',
+                      background: done ? colors.green : now ? colors.gold : '#fff',
+                      border: `3px solid ${done ? colors.green : now ? colors.gold : colors.borderLight}`,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: 11,
+                      color: '#fff',
+                      fontWeight: 800,
+                      marginBottom: 8,
+                    }}
+                  >
+                    {done ? '✓' : now ? '!' : ''}
+                  </div>
+                  <div style={{ fontSize: 11.5, fontWeight: 800, color: now ? colors.goldText : colors.navy }}>{step.date}</div>
+                  <div style={{ fontSize: 11, fontWeight: 600, color: colors.textMuted, marginTop: 2, lineHeight: 1.3 }}>{step.label}</div>
                 </div>
-                <div style={{ fontSize: 11.5, fontWeight: 800, color: e.now ? colors.goldText : colors.navy }}>{e.date}</div>
-                <div style={{ fontSize: 11, fontWeight: 600, color: colors.textMuted, marginTop: 2, lineHeight: 1.3 }}>{e.label}</div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-          {CONFERENCES.map((conf) => (
-            <div key={conf.key} style={{ border: `2px solid ${colors.borderFaint}`, borderRadius: 8, padding: 20 }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-                <div>
-                  <div style={{ fontFamily: fonts.heading, fontWeight: 700, fontSize: 19, color: colors.navy }}>{conf.name}</div>
-                  <div style={{ fontSize: 12.5, fontWeight: 700, color: colors.textMuted }}>{conf.location}</div>
-                </div>
-                <span style={{ fontSize: 24 }}>🏨</span>
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 9 }}>
-                {DOC_TYPES.map((doc) => {
-                  const url = signedUrlByKey.get(`${conf.key}:${doc.key}`);
-                  return (
-                    <div key={doc.key} style={{ display: 'flex', alignItems: 'center', gap: 12, border: `1.5px solid ${colors.borderFaint}`, borderRadius: 6, padding: '11px 13px' }}>
-                      <span style={{ fontSize: 18 }}>{doc.icon}</span>
-                      <div style={{ flex: 1 }}>
-                        <div style={{ fontSize: 14, fontWeight: 800, color: colors.navy }}>{doc.label}</div>
-                        <div style={{ fontSize: 11.5, fontWeight: 600, color: colors.textMuted }}>{doc.hint}</div>
-                      </div>
-                      {url ? (
-                        <a
-                          href={url}
-                          target="_blank"
-                          rel="noreferrer"
-                          style={{ border: 'none', cursor: 'pointer', fontFamily: fonts.body, fontWeight: 800, fontSize: 12, color: '#fff', background: conf.color, padding: '8px 13px', borderRadius: 5, textDecoration: 'none' }}
-                        >
-                          Open
-                        </a>
-                      ) : (
-                        <span style={{ fontSize: 11.5, fontWeight: 700, color: colors.textMuted }}>Not uploaded yet</span>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          ))}
+        {/* Regionals runs wide across the top; SCDC and ICDC sit side by side underneath. */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <ConferenceCard conf={REGIONALS} wide comingSoon={isComingSoon(REGIONALS)} docUrls={signedUrlByKey} />
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+            {OVERNIGHT_CONFERENCES.map((conf) => (
+              <ConferenceCard key={conf.key} conf={conf} comingSoon={isComingSoon(conf)} docUrls={signedUrlByKey} />
+            ))}
+          </div>
         </div>
       </div>
       </div>

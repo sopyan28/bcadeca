@@ -2,6 +2,12 @@ import { createClient } from '@/lib/supabase/server';
 import { colors, fonts, fieldStyle, pressedButton } from '@/lib/ui/tokens';
 import { uploadConferenceDocument, deleteConferenceDocument } from '../actions';
 
+const CONFERENCE_LABELS: Record<string, string> = {
+  REGIONALS: 'Regionals',
+  SCDC: 'SCDC',
+  ICDC: 'ICDC',
+};
+
 const DOC_TYPE_LABELS: Record<string, string> = {
   permission_slip: 'Permission slip',
   packing_list: 'Packing list',
@@ -35,7 +41,8 @@ export default async function OfficerDocumentsPage() {
         <div style={{ fontFamily: fonts.heading, fontWeight: 700, fontSize: 15, color: colors.navy }}>Upload document</div>
         <label style={{ fontSize: 13, fontWeight: 700, color: colors.textSecondary }}>
           Conference
-          <select name="conference" defaultValue="SCDC" style={{ ...fieldStyle, marginTop: 6 }}>
+          <select name="conference" defaultValue="REGIONALS" style={{ ...fieldStyle, marginTop: 6 }}>
+            <option value="REGIONALS">Regionals (permission slip only)</option>
             <option value="SCDC">SCDC</option>
             <option value="ICDC">ICDC</option>
           </select>
@@ -63,7 +70,7 @@ export default async function OfficerDocumentsPage() {
             <div>
               <div style={{ fontWeight: 800, fontSize: 14, color: colors.navy }}>{d.file_name}</div>
               <div style={{ fontSize: 12, color: colors.textMuted, marginTop: 2 }}>
-                {d.conference} &middot; {DOC_TYPE_LABELS[d.doc_type] ?? d.doc_type}
+                {CONFERENCE_LABELS[d.conference] ?? d.conference} &middot; {DOC_TYPE_LABELS[d.doc_type] ?? d.doc_type}
               </div>
             </div>
             <form action={remove}>

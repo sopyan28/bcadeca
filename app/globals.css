@@ -90,3 +90,27 @@ input, select, textarea { font: inherit; }
 .site-nav::-webkit-scrollbar {
   display: none;
 }
+
+/* Conferences that haven't started yet: slow-moving 45° stripes, like a loading bar. */
+.conf-upcoming {
+  background-color: #fff;
+  background-image: linear-gradient(
+    45deg,
+    rgba(40, 163, 238, 0.09) 25%,
+    transparent 25%,
+    transparent 50%,
+    rgba(40, 163, 238, 0.09) 50%,
+    rgba(40, 163, 238, 0.09) 75%,
+    transparent 75%,
+    transparent
+  );
+  background-size: 28px 28px;
+  animation: conf-stripes 1.6s linear infinite;
+}
+@keyframes conf-stripes {
+  from { background-position: 0 0; }
+  to { background-position: 28px 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .conf-upcoming { animation: none; }
+}

@@ -86,8 +86,9 @@ export async function uploadConferenceDocument(formData: FormData) {
   const conference = String(formData.get('conference') ?? '');
   const docType = String(formData.get('docType') ?? '');
   if (!(file instanceof File) || file.size === 0) throw new Error('A file is required');
-  if (!['SCDC', 'ICDC'].includes(conference)) throw new Error('Invalid conference');
+  if (!['REGIONALS', 'SCDC', 'ICDC'].includes(conference)) throw new Error('Invalid conference');
   if (!['permission_slip', 'packing_list', 'rooming_form'].includes(docType)) throw new Error('Invalid document type');
+  if (conference === 'REGIONALS' && docType !== 'permission_slip') throw new Error('Regionals only takes a permission slip');
 
   const storagePath = `${conference}/${docType}/${Date.now()}-${file.name}`;
   const { error: uploadError } = await supabase.storage.from('conference-docs').upload(storagePath, file);
