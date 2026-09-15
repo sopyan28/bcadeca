@@ -27,7 +27,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           <div style={{ fontFamily: fonts.heading, fontWeight: 800, fontSize: 22, color: colors.navy }}>
             BCA DECA
           </div>
-          <div style={{ color: colors.textSecondary, fontSize: 14, marginTop: 2 }}>Chapter Hub</div>
+          <div style={{ color: colors.textSecondary, fontSize: 14, marginTop: 2 }}>Chapter Site</div>
         </div>
         {children}
       </div>

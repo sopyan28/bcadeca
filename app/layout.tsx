@@ -2,8 +2,8 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'BCA DECA Chapter Hub',
-  description: "Bergen County Academies' DECA chapter hub",
+  title: 'BCA DECA Chapter Site',
+  description: "Bergen County Academies' DECA chapter site",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

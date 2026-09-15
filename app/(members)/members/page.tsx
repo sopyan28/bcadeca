@@ -35,7 +35,7 @@ interface Conference {
 }
 
 // Regionals only collects a permission slip -- no packing list or rooming form.
-const REGIONALS: Conference = { key: 'REGIONALS', name: 'Regionals', details: 'Jan 11', icon: '📍', end: '2027-01-11', color: colors.green, docs: [DOC_TYPES[0]] };
+const REGIONALS: Conference = { key: 'REGIONALS', name: 'Regionals', details: 'Ramapo College · Jan 11', icon: '📍', end: '2027-01-11', color: colors.green, docs: [DOC_TYPES[0]] };
 const OVERNIGHT_CONFERENCES: Conference[] = [
   { key: 'SCDC', name: 'SCDC', details: 'Atlantic City, NJ · Mar 2–4', icon: '🏨', end: '2027-03-04', color: colors.blue, docs: DOC_TYPES },
   { key: 'ICDC', name: 'ICDC', details: 'Anaheim, CA · Apr 17–20', icon: '🏨', end: '2027-04-20', color: colors.purple, docs: DOC_TYPES },
